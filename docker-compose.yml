@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  # Service 1
+  api-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ${SERVICE1_NAME}
+    command: ['pnpm', 'run', 'start:dev']
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      DATABASE_URL: ${SERVICE1_DATABASE_URL}
+    depends_on:
+      - db
+    ports:
+      - '${SERVICE1_PORT}:3000'
+    networks:
+      - backend
+    volumes:
+      - .:/app
+      - /app/node_modules
+
+  # MySQL Database
+  db:
+    image: mysql:8
+    container_name: mysql_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+    ports:
+      - '${MYSQL_PORT}:3306'
+    volumes:
+      - mysqldata:/var/lib/mysql
+    networks:
+      - backend
+
+  # Redis (Optional)
+  redis:
+    image: redis:alpine
+    container_name: redis
+    ports:
+      - '${REDIS_PORT}:6379'
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge
+
+volumes:
+  mysqldata:

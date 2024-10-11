@@ -1,0 +1,40 @@
+# -----------------------------
+# General Configuration
+# -----------------------------
+NODE_ENV=development
+
+# -----------------------------
+# MySQL Database Configuration
+# -----------------------------
+MYSQL_ROOT_PASSWORD=root_password
+MYSQL_USER=user
+MYSQL_PASSWORD=password
+MYSQL_DATABASE=monorepo
+MYSQL_PORT=3306
+DB_HOST=db
+
+# -----------------------------
+# Service 1 Configuration
+# -----------------------------
+SERVICE1_NAME=service1
+SERVICE1_PORT=4000
+SERVICE1_DB_NAME=service1_db
+SERVICE1_DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${DB_HOST}:${MYSQL_PORT}/${SERVICE1_DB_NAME}
+
+# -----------------------------
+# Service 2 Configuration
+# -----------------------------
+SERVICE2_NAME=service2
+SERVICE2_PORT=3002
+SERVICE2_DB_NAME=service2_db
+SERVICE2_DATABASE_URL=mysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${DB_HOST}:${MYSQL_PORT}/${SERVICE2_DB_NAME}
+
+# -----------------------------
+# Redis Configuration (Optional)
+# -----------------------------
+REDIS_HOST=redis
+REDIS_PORT=6379
+
+# JWT Configuration
+JWT_SECRET=hsadbashdkasdywqeqw6123nbasdjhasgd
+JWT_EXPIRES_IN=3600
