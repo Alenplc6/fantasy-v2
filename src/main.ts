@@ -37,7 +37,7 @@ async function bootstrap() {
 
   //this is to start listening of the server
   await app.listen(3000, async () =>
-    console.log(`Server is listening on ${await app.getUrl()}`),
+    console.log(`Server is listening on http://localhost:4000`),
   );
 }
 bootstrap();

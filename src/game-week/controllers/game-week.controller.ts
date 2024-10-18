@@ -3,17 +3,14 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
-  Delete,
   DefaultValuePipe,
   ParseIntPipe,
   Query,
 } from '@nestjs/common';
 import { GameWeekService } from '../services/game-week.service';
-import { CreateGameWeekDto } from '../dto/create-game-week.dto';
-import { UpdateGameWeekDto } from '../dto/update-game-week.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { MatchDto } from '../dto/create-game-week.dto';
 
 @ApiTags('Game-Week')
 @Controller({
@@ -24,7 +21,7 @@ export class GameWeekController {
   constructor(private readonly gameWeekService: GameWeekService) {}
 
   @Post()
-  create(@Body() createGameWeekDto: CreateGameWeekDto) {
+  create(@Body() createGameWeekDto: MatchDto) {
     return this.gameWeekService.create(createGameWeekDto);
   }
 
@@ -37,22 +34,14 @@ export class GameWeekController {
     return this.gameWeekService.findAll(search, size, page);
   }
 
+  @Get('sync-game-week')
+  sync() {
+    return this.gameWeekService.syncMatches();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.gameWeekService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateGameWeekDto: UpdateGameWeekDto,
-  ) {
-    return this.gameWeekService.update(+id, updateGameWeekDto);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.gameWeekService.remove(+id);
   }
 
   //cron

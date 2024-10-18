@@ -1,18 +1,17 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { CreateGameWeekDto } from '../dto/create-game-week.dto';
-import { UpdateGameWeekDto } from '../dto/update-game-week.dto';
 import { GameWeek } from '../entities/game-week.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, map } from 'rxjs';
 import { HttpService } from '@nestjs/axios';
-import { AxiosError } from 'axios';
+import { AxiosError, AxiosResponse } from 'axios';
 import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PlayerPoint } from 'src/player-point/entities/player-point.entity';
+import { MatchDto } from '../dto/create-game-week.dto';
 
 @Injectable()
 export class GameWeekService {
@@ -53,7 +52,7 @@ export class GameWeekService {
       if (matchStatus === 'Ended') {
         const gameWeek = await this.gameWeekRepository.findOneBy({ mid });
         await this.gameWeekRepository.update(gameWeek.id, {
-          isGameEnded: true,
+          status_str: 'ended',
         });
         this.givePointsToPlayer(mid);
         // try {
@@ -126,23 +125,10 @@ export class GameWeekService {
     });
   }
 
-  async create(dto: CreateGameWeekDto) {
-    const { startTime, mid } = dto;
-    const game = this.gameWeekRepository.create({ ...dto });
-    const time = this.convertDateToCron(startTime);
-    console.log(time);
-    await this.gameWeekRepository.save(game);
-
-    const pot = await this.playerPointRepository.create({
-      playerId: 1,
-      userId: 1,
-      fantasyPointId: 631,
-      point: 100,
-    });
-
-    // this will add crone job
-    this.addCronJob(`${game.id}`, time, mid);
-    return { game, pot };
+  // Create a new match
+  async create(matchData: Partial<MatchDto>): Promise<GameWeek> {
+    const match = this.gameWeekRepository.create(matchData);
+    return await this.gameWeekRepository.save(match);
   }
 
   async findAll(q: string, pageSize: number, page: number) {
@@ -171,22 +157,60 @@ export class GameWeekService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateGameWeekDto) {
-    const user = await this.gameWeekRepository.findOne({ where: { id } });
+  // async syncMatches(): Promise<any> {
+  //   console.log('sync matchs');
+  //   // try {
+  //   //   const response = await firstValueFrom(
+  //   //     this.httpService.get(
+  //   //       `https://soccer.entitysport.com/competition/1118/matches?token=7fc501337ade4a0e3fc64b043f2f5705&status=1&per_page=50&paged=2`,
+  //   //     ),
+  //   //   );
+  //   //   return response.data; // Extract data from the response
+  //   // } catch (error) {
+  //   //   console.error('Error making HTTP GET request:');
+  //   //   // throw error;
+  //   // }
+  // }
 
-    if (!user) {
-      throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
+  async syncMatches() {
+    const perPage = 50;
+    let currentPage = 1;
+    const delay = (ms: number) =>
+      new Promise((resolve) => setTimeout(resolve, ms));
+
+    while (true) {
+      try {
+        const teams = await this.httpService
+          .get(
+            `https://soccer.entitysport.com/competition/1118/matches?token=${process.env.ENTITY_SPORT_TOKEN}&status=1&per_page=${perPage}&paged=${currentPage}`,
+          )
+          .pipe(map((response: AxiosResponse) => response.data.response.items))
+          .toPromise();
+
+        if (!teams || teams.length === 0) {
+          console.log('No more teams to fetch. Ending process.');
+          break;
+        }
+
+        for (const teamData of teams) {
+          const team = this.gameWeekRepository.create(teamData);
+          await this.gameWeekRepository.save(team);
+        }
+
+        console.log(`Processed page ${currentPage}`);
+        currentPage++;
+
+        // Wait for 1 second before the next API call
+        await delay(1000);
+      } catch (error) {
+        console.error(
+          `Error fetching teams on page ${currentPage}:`,
+          error.message,
+        );
+        break;
+      }
     }
 
-    return await this.gameWeekRepository.update(id, updateUserDto);
-  }
-
-  async remove(id: number) {
-    const user = await this.gameWeekRepository.findOne({ where: { id } });
-    if (!user) {
-      throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
-    }
-    await this.gameWeekRepository.delete(id);
-    return { message: 'User removed successfully' };
+    return { message: 'Team fetching and saving process completed' };
   }
 }

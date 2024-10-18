@@ -14,22 +14,33 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { Player } from 'src/player/entities/player.entity';
 import { User } from 'src/user/entities/user.entity';
+import { Competition } from './entities/competition';
+import { GameWeekTeam } from './entities/team-game-week';
+import { Venue } from './entities/venue';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule,
     TypeOrmModule.forFeature([
       GameWeek,
       TeamPlayer,
       FantasyPoint,
       PlayerPoint,
+      Competition,
+      GameWeekTeam,
+      Venue,
       Player,
       User,
     ]),
-    BullModule.forRoot({
-      connection: {
-        host: 'redis', // Your Redis host
-        port: 6379, // Your Redis port
-      },
+    BullModule.forRootAsync({
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get<string>('REDIS_HOST'),
+          port: configService.get<number>('REDIS_PORT'),
+        },
+      }),
+      inject: [ConfigService],
     }),
     BullModule.registerQueue({
       name: 'point-queue', // Name of the queue
