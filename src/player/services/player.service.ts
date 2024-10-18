@@ -33,11 +33,11 @@ export class PlayerService {
     return player;
   }
 
-  async findAll(position: string, q: string, pageSize: number, page: number) {
+  async findAll(q: string, pageSize: number, page: number, position?: string) {
     const [data, total] = await this.playerRepository.findAndCount({
       where: {
         fullName: ILike(`%${q.toLocaleLowerCase()}%`),
-        positionName: ILike(`%${position}%`),
+        positionName: ILike(`%${position.toLocaleLowerCase}%`),
       },
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results

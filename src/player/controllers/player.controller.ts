@@ -28,14 +28,23 @@ export class PlayerController {
     return this.playerService.create(createPlayerDto);
   }
 
-  @Get()
+  @Get('')
   findAll(
-    @Param('position') position: string,
     @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
   ) {
-    return this.playerService.findAll(position, search, size, page);
+    return this.playerService.findAll(search, size, page);
+  }
+
+  @Get('position')
+  find(
+    @Query('position') position: string,
+    @Query('query', new DefaultValuePipe('')) search: string,
+    @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+  ) {
+    return this.playerService.findAll(search, size, page, position);
   }
 
   @Get('sync-plyers')
