@@ -44,7 +44,7 @@ export class PlayerController {
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
   ) {
-    return this.playerService.findAll(search, size, page, position);
+    return this.playerService.findAllWithPosition(search, size, page, position);
   }
 
   @Get('sync-plyers')

@@ -33,11 +33,36 @@ export class PlayerService {
     return player;
   }
 
-  async findAll(q: string, pageSize: number, page: number, position?: string) {
+  async findAll(q: string, pageSize: number, page: number) {
+    const [data, total] = await this.playerRepository.findAndCount({
+      where: {
+        fullName: ILike(`%${q}%`),
+      },
+      skip: (page - 1) * pageSize, // calculate the offset
+      take: pageSize, // limit the number of results
+      order: {
+        id: 'ASC',
+      },
+    });
+
+    return {
+      data, // paginated data
+      total, // total number of records
+      currentPage: page,
+      pageSize,
+    };
+  }
+
+  async findAllWithPosition(
+    q: string,
+    pageSize: number,
+    page: number,
+    position: string,
+  ) {
     const [data, total] = await this.playerRepository.findAndCount({
       where: {
         fullName: ILike(`%${q.toLocaleLowerCase()}%`),
-        positionName: ILike(`%${position.toLocaleLowerCase}%`),
+        positionName: position,
       },
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results

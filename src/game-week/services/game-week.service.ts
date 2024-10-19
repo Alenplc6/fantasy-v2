@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { GameWeek } from '../entities/game-week.entity';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
@@ -12,6 +12,9 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { PlayerPoint } from 'src/player-point/entities/player-point.entity';
 import { MatchDto } from '../dto/create-game-week.dto';
+import { GameWeekTeam } from '../entities/team-game-week';
+import { Competition } from '../entities/competition';
+import { Venue } from '../entities/venue';
 
 @Injectable()
 export class GameWeekService {
@@ -26,6 +29,12 @@ export class GameWeekService {
     @InjectQueue('point-queue') private readonly pointQueue: Queue,
     @InjectRepository(PlayerPoint)
     private readonly playerPointRepository: Repository<PlayerPoint>,
+    @InjectRepository(GameWeekTeam)
+    private readonly gameWeekTeamRepository: Repository<GameWeekTeam>,
+    @InjectRepository(Competition)
+    private readonly competitionRepository: Repository<Competition>,
+    @InjectRepository(Venue)
+    private readonly venueRepository: Repository<Venue>,
   ) {}
 
   async getFantasyPoints() {
@@ -84,17 +93,15 @@ export class GameWeekService {
   }
 
   convertDateToCron(dateString: string): string {
-    console.log(dateString);
-    // const date = new Date(dateString);
+    const date = new Date(dateString);
 
     // Extract minute, hour, day, and month
-    // const minute = date.getUTCMinutes();
-    // const hour = date.getUTCHours();
-    // const day = date.getUTCDate();
-    // const month = date.getUTCMonth() + 1;
+    const minute = date.getUTCMinutes();
+    const hour = date.getUTCHours();
+    const day = date.getUTCDate();
+    const month = date.getUTCMonth() + 1;
 
-    // return `* ${minute} ${hour} ${day} ${month} *`;
-    return `1 * * * * *`;
+    return `* ${minute} ${hour} ${day} ${month} *`;
   }
 
   // Method to add a cron job dynamically
@@ -131,8 +138,27 @@ export class GameWeekService {
     return await this.gameWeekRepository.save(match);
   }
 
+  async sync() {
+    const data = await this.gameWeekRepository.find({
+      where: { status_str: 'upcoming' },
+    });
+
+    for (let i = 0; i < data.length; i++) {
+      const { mid, datestart } = data[i];
+      const date = this.convertDateToCron(datestart);
+      this.addCronJob(`match-${mid}`, date, +mid);
+    }
+
+    return { message: 'Game Week Seed Successful' };
+  }
+
   async findAll(q: string, pageSize: number, page: number) {
     const [data, total] = await this.gameWeekRepository.findAndCount({
+      where: {
+        home_team: {
+          tname: ILike(`%${q.toLocaleLowerCase()}%`),
+        },
+      },
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results
       order: {
@@ -157,21 +183,6 @@ export class GameWeekService {
     return user;
   }
 
-  // async syncMatches(): Promise<any> {
-  //   console.log('sync matchs');
-  //   // try {
-  //   //   const response = await firstValueFrom(
-  //   //     this.httpService.get(
-  //   //       `https://soccer.entitysport.com/competition/1118/matches?token=7fc501337ade4a0e3fc64b043f2f5705&status=1&per_page=50&paged=2`,
-  //   //     ),
-  //   //   );
-  //   //   return response.data; // Extract data from the response
-  //   // } catch (error) {
-  //   //   console.error('Error making HTTP GET request:');
-  //   //   // throw error;
-  //   // }
-  // }
-
   async syncMatches() {
     const perPage = 50;
     let currentPage = 1;
@@ -193,7 +204,17 @@ export class GameWeekService {
         }
 
         for (const teamData of teams) {
-          const team = this.gameWeekRepository.create(teamData);
+          const homeTeam = this.gameWeekTeamRepository.create(
+            teamData.teams.home,
+          );
+          const awayTeam = this.gameWeekTeamRepository.create(
+            teamData.teams.away,
+          );
+          const team = this.gameWeekRepository.create({
+            ...teamData,
+            home_team: homeTeam,
+            away_team: awayTeam,
+          });
           await this.gameWeekRepository.save(team);
         }
 

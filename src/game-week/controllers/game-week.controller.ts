@@ -39,6 +39,11 @@ export class GameWeekController {
     return this.gameWeekService.syncMatches();
   }
 
+  @Get('reschedule')
+  reschedule() {
+    return this.gameWeekService.sync();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.gameWeekService.findOne(+id);
