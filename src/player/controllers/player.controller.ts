@@ -49,7 +49,7 @@ export class PlayerController {
 
   @Get('sync-plyers')
   findAllPlayers() {
-    return this.playerService.getAllPlayers();
+    return this.playerService.fetchExternalData();
   }
 
   // @Get(':position')

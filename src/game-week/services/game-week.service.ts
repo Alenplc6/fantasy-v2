@@ -193,7 +193,7 @@ export class GameWeekService {
       try {
         const teams = await this.httpService
           .get(
-            `https://soccer.entitysport.com/competition/1118/matches?token=${process.env.ENTITY_SPORT_TOKEN}&status=1&per_page=${perPage}&paged=${currentPage}`,
+            `https://soccer.entitysport.com/competition/1118/matches?token=${process.env.ENTITY_SPORT_TOKEN}&status=2&per_page=${perPage}&paged=${currentPage}`,
           )
           .pipe(map((response: AxiosResponse) => response.data.response.items))
           .toPromise();
