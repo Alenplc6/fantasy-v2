@@ -1,16 +1,17 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
+import { Formation } from 'src/formation/entities/formation.entity';
+import { Player } from 'src/player/entities/player.entity';
+import { ILike, Repository } from 'typeorm';
 import {
   CreateTeamDto,
   CreateUserDto,
   UpdatePasswordDto,
 } from '../dto/create-user.dto';
 import { UpdateUserDto } from '../dto/update-user.dto';
-import { ILike, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../entities/user.entity';
-import * as bcrypt from 'bcryptjs';
 import { TeamPlayer } from '../entities/team.entity';
-import { Player } from 'src/player/entities/player.entity';
+import { User } from '../entities/user.entity';
 
 @Injectable()
 export class UserService {
@@ -20,6 +21,8 @@ export class UserService {
     private readonly teamPlayerRepository: Repository<TeamPlayer>,
     @InjectRepository(Player)
     private readonly playerRepository: Repository<Player>,
+    @InjectRepository(Formation)
+    private readonly formationRepository: Repository<Formation>,
   ) {}
 
   // helper methods
@@ -109,7 +112,20 @@ export class UserService {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
 
-    return await this.userRepository.update(id, updateUserDto);
+    const formationData = await this.formationRepository.findOne({
+      where: { id: updateUserDto.formation },
+    });
+    if (!formationData) {
+      throw new HttpException(
+        'formation dose not exist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return await this.userRepository.update(id, {
+      ...updateUserDto,
+      formation: formationData,
+    });
   }
 
   async remove(id: number) {
@@ -171,13 +187,25 @@ export class UserService {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
 
-    await this.userRepository.update(id, { teamName, coachName, formation });
+    const formationData = await this.formationRepository.findOne({
+      where: { id: formation },
+    });
+    if (!formationData) {
+      throw new HttpException(
+        'formation dose not exist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    await this.userRepository.update(id, {
+      teamName,
+      coachName,
+      formation: formationData,
+    });
 
     goalKeeper.map(async (goal: string) => {
       const teamPlayer = new TeamPlayer();
       const player = await this.playerRepository.findOneBy({ id: +goal });
-
-      console.log(player);
       teamPlayer.pid = player.pid;
       teamPlayer.player = player; // Assign the Player entity
       teamPlayer.user = user; // Assign the User entity
@@ -235,6 +263,18 @@ export class UserService {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
 
-    return await this.userRepository.update(id, updateUserDto);
+    const formation = await this.formationRepository.findOne({
+      where: { id: updateUserDto.formation },
+    });
+    if (!formation) {
+      throw new HttpException(
+        'formation dose not exist',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+    return await this.userRepository.update(id, {
+      ...updateUserDto,
+      formation,
+    });
   }
 }

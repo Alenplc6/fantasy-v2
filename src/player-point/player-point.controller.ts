@@ -1,8 +1,8 @@
 import {
   Controller,
+  DefaultValuePipe,
   Get,
   Param,
-  DefaultValuePipe,
   ParseIntPipe,
   Query,
 } from '@nestjs/common';
@@ -22,6 +22,11 @@ export class PlayerPointController {
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
   ) {
     return this.playerPointService.findAll(search, size, page);
+  }
+
+  @Get('leader-board')
+  leaderBoard() {
+    return this.playerPointService.getRankedFantasyPointsBetweenDates();
   }
 
   @Get(':id')

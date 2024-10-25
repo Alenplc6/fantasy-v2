@@ -12,6 +12,39 @@ export class PlayerPointService {
 
   async findAll(q: string, pageSize: number, page: number) {
     const [data, total] = await this.pointRepository.findAndCount({
+      loadEagerRelations: false,
+      skip: (page - 1) * pageSize, // calculate the offset
+      take: pageSize, // limit the number of results
+      order: {
+        // Sort results, e.g., by `id` column
+        id: 'ASC',
+      },
+      relations: ['user', 'player'],
+    });
+
+    return {
+      data, // paginated data
+      total, // total number of records
+      currentPage: page,
+      pageSize,
+    };
+  }
+
+  async getRankedFantasyPointsBetweenDates() {
+    return await this.pointRepository
+      .createQueryBuilder('playerPoint')
+      .select('playerPoint.userId', 'userId')
+      .addSelect('SUM(playerPoint.point)', 'totalPoints')
+      // .where('playerPoint.createdAt BETWEEN :startDate AND :endDate', {
+      //   startDate,
+      //   endDate,
+      // })
+      .groupBy('playerPoint.userId')
+      .getRawMany();
+  }
+
+  async leaderBored(q: string, pageSize: number, page: number) {
+    const [data, total] = await this.pointRepository.findAndCount({
       loadEagerRelations: true,
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results

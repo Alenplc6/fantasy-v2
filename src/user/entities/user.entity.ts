@@ -1,8 +1,11 @@
+import { Formation } from 'src/formation/entities/formation.entity';
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -43,8 +46,9 @@ export class User {
   @Column({ default: true })
   isActive: boolean;
 
-  @Column({ nullable: true })
-  formation: string;
+  @ManyToOne(() => Formation, { eager: true, cascade: true, nullable: true })
+  @JoinColumn({ name: 'formation_id' })
+  formation: Formation;
 
   @Column({ default: 0 })
   TotalPoints: number;

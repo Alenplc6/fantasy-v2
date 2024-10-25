@@ -1,8 +1,8 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
 
@@ -15,13 +15,13 @@ export class Formation {
   name: string;
 
   @Column({ nullable: true })
-  offense: number;
+  defense: number;
 
   @Column({ nullable: true })
   midfield: number;
 
   @Column({ nullable: true })
-  defense: number;
+  offense: number;
 
   @Column('text')
   formationAlignment: string;

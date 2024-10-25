@@ -4,6 +4,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsEnum,
+  IsNumber,
   IsOptional,
   IsString,
   Matches,
@@ -55,7 +56,7 @@ export class UpdatePasswordDto {
   conformPassword: string;
 }
 
-export class CreateTeamDto {
+export class CreateNewTeamDto {
   @IsString()
   @ApiProperty({ type: String, description: 'teamName' })
   teamName: string;
@@ -92,9 +93,9 @@ export class CreateTeamDto {
   @ApiProperty({ type: Array, description: 'offense' })
   offense: [string];
 
-  @IsString()
-  @ApiProperty({ type: String, description: 'formation' })
-  formation: string;
+  @IsNumber()
+  @ApiProperty({ type: Number, description: 'formation' })
+  formation: number;
 
   @IsArray()
   @ArrayMinSize(2)

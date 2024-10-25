@@ -4,6 +4,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsEnum,
+  IsNumber,
   IsString,
   Matches,
 } from 'class-validator';
@@ -79,9 +80,9 @@ export class CreateTeamDto {
   @ApiProperty({ type: Array, description: 'offense' })
   offense: [string];
 
-  @IsString()
+  @IsNumber()
   @ApiProperty({ type: String, description: 'formation' })
-  formation: string;
+  formation: number;
 
   @IsArray()
   @ArrayMinSize(2)

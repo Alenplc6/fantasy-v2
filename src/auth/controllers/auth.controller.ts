@@ -7,18 +7,18 @@ import {
   Post,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from '../services/auth.service';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import {
-  CreateSignInDto,
-  CreateTeamDto,
-  UpdatePasswordDto,
-} from '../dto/create-auth.dto';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 import { User } from 'src/user/entities/user.entity';
 import { GetUser } from '../decorators/get.user.decorator';
+import {
+  CreateNewTeamDto,
+  CreateSignInDto,
+  UpdatePasswordDto,
+} from '../dto/create-auth.dto';
 import { JwtGuard } from '../guards/jwt.guard';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { AuthService } from '../services/auth.service';
 
 @ApiTags('Auth')
 @Controller({
@@ -38,8 +38,8 @@ export class AuthController {
     return this.authService.signIn(createSignInDto);
   }
 
-  @Post('/create-team/:id')
-  createTeam(@Param('id') id: string, @Body() createTeamDto: CreateTeamDto) {
+  @Patch('/create-team/:id')
+  createTeam(@Param('id') id: string, @Body() createTeamDto: CreateNewTeamDto) {
     return this.authService.createTeam(id, createTeamDto);
   }
 

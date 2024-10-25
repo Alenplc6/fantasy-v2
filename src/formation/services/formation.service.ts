@@ -4,10 +4,10 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateFormationDtoOld } from '../dto/create-formation.dto';
-import { UpdateFormationDto } from '../dto/update-formation.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateFormationDtoOld } from '../dto/create-formation.dto';
+import { UpdateFormationDto } from '../dto/update-formation.dto';
 import { Formation } from '../entities/formation.entity';
 
 @Injectable()
@@ -41,8 +41,8 @@ export class FormationService {
       defense,
       formationAlignment: JSON.stringify([
         { name: 'Defense', players: Defense },
-        { name: 'Offense', players: Offense },
         { name: 'Mid Field', players: MidField },
+        { name: 'Offense', players: Offense },
       ]),
     });
 

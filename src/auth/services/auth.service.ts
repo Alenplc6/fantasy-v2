@@ -1,14 +1,14 @@
 import { Injectable } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { User } from 'src/user/entities/user.entity';
 import { UserService } from 'src/user/services/user.service';
 import {
   CreateAuthDto,
+  CreateNewTeamDto,
   CreateSignInDto,
-  CreateTeamDto,
   UpdatePasswordDto,
 } from '../dto/create-auth.dto';
-import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/user/entities/user.entity';
-import { UpdateUserDto } from 'src/user/dto/update-user.dto';
 
 @Injectable()
 export class AuthService {
@@ -41,7 +41,7 @@ export class AuthService {
     return await this.userService.updatePassword(user, updatePasswordDto);
   }
 
-  async createTeam(id: string, createTeamDto: CreateTeamDto) {
+  async createTeam(id: string, createTeamDto: CreateNewTeamDto) {
     return await this.userService.createTeam(+id, createTeamDto);
   }
 

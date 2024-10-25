@@ -2,11 +2,13 @@ import { FantasyPoint } from 'src/fantasy-point/entities/fantasy-point.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
-  Entity,
-  PrimaryGeneratedColumn,
   Column,
+  CreateDateColumn,
+  Entity,
   JoinColumn,
   ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 
 @Entity()
@@ -40,4 +42,10 @@ export class PlayerPoint {
 
   @Column({ default: 0 })
   point: number;
+
+  @CreateDateColumn({ type: 'timestamp' })
+  createdAt: Date;
+
+  @UpdateDateColumn({ type: 'timestamp' })
+  updatedAt: Date;
 }
