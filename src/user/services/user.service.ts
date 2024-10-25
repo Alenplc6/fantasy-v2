@@ -312,8 +312,7 @@ export class UserService {
     await this.teamPlayerRepository.save(teamPlayer);
   }
 
-  async myTeam(user: User) {
-    const { id } = user;
+  async myTeam(id: number) {
     return this.teamPlayerRepository.find({
       where: {
         userId: id,
