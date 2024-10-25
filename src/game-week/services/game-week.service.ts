@@ -186,6 +186,7 @@ export class GameWeekService {
     const query = this.gameWeekRepository
       .createQueryBuilder('gameWeek')
       .leftJoinAndSelect('gameWeek.home_team', 'homeTeam') // Ensure this is the correct relationship
+      .leftJoinAndSelect('gameWeek.away_team', 'awayTeam') // Ensure this is the correct relationship
       .where('LOWER(homeTeam.tname) LIKE LOWER(:tname)', {
         tname: `%${q.toLocaleLowerCase()}%`,
       }); // Case-insensitive search
@@ -206,7 +207,7 @@ export class GameWeekService {
     const [data, total] = await query
       .skip((page - 1) * pageSize) // Calculate the offset
       .take(pageSize) // Limit the number of results
-      .orderBy('gameWeek.id', 'ASC') // Sort results by `id` column
+      .orderBy('gameWeek.datestart', 'ASC') // Sort results by `id` column
       .getManyAndCount(); // Execute the query and get results
 
     return {
