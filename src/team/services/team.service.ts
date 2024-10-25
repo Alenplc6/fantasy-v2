@@ -3,7 +3,7 @@ import { CreateTeamDto } from '../dto/create-team.dto';
 import { UpdateTeamDto } from '../dto/update-team.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../entities';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { map } from 'rxjs';
@@ -23,16 +23,15 @@ export class TeamService {
   }
 
   async findAll(q: string, pageSize: number, page: number) {
-    const [data, total] = await this.teamRepository.findAndCount({
-      where: { fullname: ILike(`%${q}%`) },
-      skip: (page - 1) * pageSize, // calculate the offset
-      take: pageSize, // limit the number of results
-      order: {
-        // Sort results, e.g., by `id` column
-        id: 'DESC',
-      },
+    const query = this.teamRepository.createQueryBuilder('team');
+    query.where('LOWER(team.fullname) LIKE LOWER(:fullname)', {
+      fullname: `%${q}%`,
     });
+    query.skip((page - 1) * pageSize);
+    query.take(pageSize);
+    query.orderBy('team.id', 'DESC');
 
+    const [data, total] = await query.getManyAndCount();
     return {
       data, // paginated data
       total, // total number of records

@@ -13,7 +13,7 @@ import {
 import { TeamService } from '../services/team.service';
 import { CreateTeamDto } from '../dto/create-team.dto';
 import { UpdateTeamDto } from '../dto/update-team.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('team')
 @Controller({
@@ -29,6 +29,18 @@ export class TeamController {
   }
 
   @Get()
+  @ApiQuery({ name: 'query', required: false, description: 'Filter by query' })
+  @ApiQuery({ name: 'round', required: false, description: 'Filter by round' })
+  @ApiQuery({
+    name: 'startDate',
+    required: false,
+    description: 'Start date for filtering',
+  })
+  @ApiQuery({
+    name: 'endDate',
+    required: false,
+    description: 'End date for filtering',
+  })
   findAll(
     @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,

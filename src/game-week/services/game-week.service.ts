@@ -1,6 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { GameWeek } from '../entities/game-week.entity';
-import { ILike, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { SchedulerRegistry } from '@nestjs/schedule';
 import { CronJob } from 'cron';
@@ -152,27 +152,69 @@ export class GameWeekService {
     return { message: 'Game Week Seed Successful' };
   }
 
-  async findAll(q: string, pageSize: number, page: number) {
-    const [data, total] = await this.gameWeekRepository.findAndCount({
-      where: {
-        home_team: {
-          tname: ILike(`%${q.toLocaleLowerCase()}%`),
-        },
-      },
-      skip: (page - 1) * pageSize, // calculate the offset
-      take: pageSize, // limit the number of results
-      order: {
-        // Sort results, e.g., by `id` column
-        id: 'ASC',
-      },
-    });
+  // async findAll(q: string, pageSize: number, page: number) {
+  //   const [data, total] = await this.gameWeekRepository.findAndCount({
+  //     where: {
+  //       home_team: {
+  //         tname: ILike(`%${q.toLocaleLowerCase()}%`),
+  //       },
+  //     },
+  //     skip: (page - 1) * pageSize, // calculate the offset
+  //     take: pageSize, // limit the number of results
+  //     order: {
+  //       // Sort results, e.g., by `id` column
+  //       id: 'ASC',
+  //     },
+  //   });
+
+  //   return {
+  //     data, // paginated data
+  //     total, // total number of records
+  //     currentPage: page,
+  //     pageSize,
+  //   };
+  // }
+
+  async findAll(
+    q: string,
+    page: number,
+    pageSize: number,
+    round?: string,
+    // startDate?: Date,
+    // endDate?: Date,
+  ) {
+    const query = this.gameWeekRepository
+      .createQueryBuilder('gameWeek')
+      .leftJoinAndSelect('gameWeek.home_team', 'homeTeam') // Ensure this is the correct relationship
+      .where('LOWER(homeTeam.tname) LIKE LOWER(:tname)', {
+        tname: `%${q.toLocaleLowerCase()}%`,
+      }); // Case-insensitive search
+
+    // Add optional round filter
+    if (round) {
+      query.andWhere('gameWeek.round = :round', { round: round.toString() });
+    }
+
+    // if (startDate) {
+    //   query.andWhere('gameWeek.datestart >= :startDate', { startDate });
+    // }
+
+    // if (endDate) {
+    //   query.andWhere('gameWeek.datestart <= :endDate', { endDate });
+    // }
+
+    const [data, total] = await query
+      .skip((page - 1) * pageSize) // Calculate the offset
+      .take(pageSize) // Limit the number of results
+      .orderBy('gameWeek.id', 'ASC') // Sort results by `id` column
+      .getManyAndCount(); // Execute the query and get results
 
     return {
-      data, // paginated data
-      total, // total number of records
+      data,
+      total,
       currentPage: page,
       pageSize,
-    };
+    }; // Return the results
   }
 
   async findOne(id: number) {

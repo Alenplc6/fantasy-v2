@@ -30,8 +30,18 @@ export class GameWeekController {
     @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('round', new DefaultValuePipe('')) round: string,
+    // @Query('startDate') startDate?: string, // Make startDate optional
+    // @Query('endDate') endDate?: string, // Make endDate optional
   ) {
-    return this.gameWeekService.findAll(search, size, page);
+    return this.gameWeekService.findAll(
+      search,
+      page,
+      size,
+      round,
+      // new Date(startDate),
+      // new Date(endDate),
+    );
   }
 
   @Get('sync-game-week')
