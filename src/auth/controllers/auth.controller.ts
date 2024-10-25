@@ -89,10 +89,10 @@ export class AuthController {
     return this.authService.substitution(user, updateUserDto);
   }
 
-  @Get('my-team')
+  @Get('my-team/:id')
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  myTeam(@GetUser() user: User) {
-    return this.authService.myTeam(user);
+  myTeam(@Param('id') id: number) {
+    return this.authService.myTeam(id);
   }
 }
