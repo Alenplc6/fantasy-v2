@@ -63,7 +63,7 @@ export class AuthService {
     });
   }
 
-  async myTeam(user: User) {
-    return await this.userService.myTeam(user);
+  async myTeam(id: number) {
+    return await this.userService.myTeam(id);
   }
 }
