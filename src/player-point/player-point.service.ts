@@ -30,15 +30,17 @@ export class PlayerPointService {
     };
   }
 
-  async getRankedFantasyPointsBetweenDates() {
+  async getRankedFantasyPointsBetweenDates(startDate: Date, endDate: Date) {
     return await this.pointRepository
       .createQueryBuilder('playerPoint')
+      .leftJoinAndSelect('playerPoint.user', 'user')
       .select('playerPoint.userId', 'userId')
+      .addSelect('user.fullName', 'fullName') // Replace with actual columns you want to retrieve
       .addSelect('SUM(playerPoint.point)', 'totalPoints')
-      // .where('playerPoint.createdAt BETWEEN :startDate AND :endDate', {
-      //   startDate,
-      //   endDate,
-      // })
+      .where('playerPoint.createdAt BETWEEN :startDate AND :endDate', {
+        startDate,
+        endDate,
+      })
       .groupBy('playerPoint.userId')
       .getRawMany();
   }

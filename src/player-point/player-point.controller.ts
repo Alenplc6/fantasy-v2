@@ -25,8 +25,14 @@ export class PlayerPointController {
   }
 
   @Get('leader-board')
-  leaderBoard() {
-    return this.playerPointService.getRankedFantasyPointsBetweenDates();
+  leaderBoard(
+    @Query('startDate') startDate: Date,
+    @Query('endDate') endDate: Date,
+  ) {
+    return this.playerPointService.getRankedFantasyPointsBetweenDates(
+      startDate,
+      endDate,
+    );
   }
 
   @Get(':id')
