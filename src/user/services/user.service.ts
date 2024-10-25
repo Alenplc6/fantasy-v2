@@ -1,6 +1,7 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
+import { UpdateSettingDto } from 'src/auth/dto/create-auth.dto';
 import { Formation } from 'src/formation/entities/formation.entity';
 import { Player } from 'src/player/entities/player.entity';
 import { ILike, Repository } from 'typeorm';
@@ -111,20 +112,8 @@ export class UserService {
     if (!user) {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
-
-    const formationData = await this.formationRepository.findOne({
-      where: { id: updateUserDto.formation },
-    });
-    if (!formationData) {
-      throw new HttpException(
-        'formation dose not exist',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     return await this.userRepository.update(id, {
       ...updateUserDto,
-      formation: formationData,
     });
   }
 
@@ -263,6 +252,18 @@ export class UserService {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
 
+    return await this.userRepository.update(id, {
+      ...updateUserDto,
+    });
+  }
+
+  async updateSetting(userData: User, updateUserDto: UpdateSettingDto) {
+    const { id } = userData;
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user) {
+      throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
+    }
+
     const formation = await this.formationRepository.findOne({
       where: { id: updateUserDto.formation },
     });
@@ -272,6 +273,7 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     }
+
     return await this.userRepository.update(id, {
       ...updateUserDto,
       formation,

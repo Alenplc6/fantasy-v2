@@ -113,3 +113,17 @@ export class CreateSubstitutionDto {
   @ApiProperty({ type: Number, description: 'oldPlayerId' })
   oldPlayerId: number;
 }
+
+export class UpdateSettingDto {
+  @IsString()
+  @ApiProperty({ type: String, description: 'teamName' })
+  teamName: string;
+
+  @IsString()
+  @ApiProperty({ type: String, description: 'coachName' })
+  coachName: string;
+
+  @IsNumber()
+  @ApiProperty({ type: String, description: 'formation' })
+  formation: number;
+}

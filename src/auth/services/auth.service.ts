@@ -9,6 +9,7 @@ import {
   CreateSignInDto,
   CreateSubstitutionDto,
   UpdatePasswordDto,
+  UpdateSettingDto,
 } from '../dto/create-auth.dto';
 
 @Injectable()
@@ -48,6 +49,10 @@ export class AuthService {
 
   async updateProfile(user: User, updateUserDto: UpdateUserDto) {
     return await this.userService.updateProfile(user, updateUserDto);
+  }
+
+  async updateSetting(user: User, updateUserDto: UpdateSettingDto) {
+    return await this.userService.updateSetting(user, updateUserDto);
   }
 
   async substitution(user: User, updateUserDto: CreateSubstitutionDto) {

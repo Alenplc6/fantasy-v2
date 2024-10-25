@@ -17,6 +17,7 @@ import {
   CreateSignInDto,
   CreateSubstitutionDto,
   UpdatePasswordDto,
+  UpdateSettingDto,
 } from '../dto/create-auth.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { AuthService } from '../services/auth.service';
@@ -66,6 +67,16 @@ export class AuthController {
   @UseGuards(JwtGuard)
   updateProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
     return this.authService.updateProfile(user, updateUserDto);
+  }
+
+  @Patch('update-settings')
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
+  updateSettings(
+    @GetUser() user: User,
+    @Body() updateUserDto: UpdateSettingDto,
+  ) {
+    return this.authService.updateSetting(user, updateUserDto);
   }
 
   @Patch('substitution')
