@@ -29,7 +29,7 @@ export class TeamPlayer {
   playerId: number;
 
   // One-to-one relationship with Player
-  @ManyToOne(() => Player)
+  @ManyToOne(() => Player, { eager: true })
   @JoinColumn({ name: 'player_id', referencedColumnName: 'id' }) // Foreign key column in PlayerUserRelation table
   player: Player;
 
