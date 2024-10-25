@@ -62,4 +62,8 @@ export class AuthService {
       newPlayerId,
     });
   }
+
+  async myTeam(user: User) {
+    return await this.userService.myTeam(user);
+  }
 }

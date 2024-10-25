@@ -190,6 +190,7 @@ export class UserService {
       teamName,
       coachName,
       formation: formationData,
+      isTeamCreated: true,
     });
 
     goalKeeper.map(async (goal: string) => {
@@ -242,7 +243,7 @@ export class UserService {
       await this.teamPlayerRepository.save(teamPlayer);
     });
 
-    // return await this.userRepository.update(id, createTeamDto);
+    return user;
   }
 
   async updateProfile(userData: User, updateUserDto: UpdateUserDto) {
@@ -309,5 +310,14 @@ export class UserService {
     teamPlayer.position = newPlayer.positionName;
     teamPlayer.isCapitan = false;
     await this.teamPlayerRepository.save(teamPlayer);
+  }
+
+  async myTeam(user: User) {
+    const { id } = user;
+    return this.teamPlayerRepository.find({
+      where: {
+        userId: id,
+      },
+    });
   }
 }
