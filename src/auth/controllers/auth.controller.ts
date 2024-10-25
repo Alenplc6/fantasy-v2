@@ -69,7 +69,7 @@ export class AuthController {
     return this.authService.updateProfile(user, updateUserDto);
   }
 
-  @Patch('update-settings')
+  @Patch('update-setting')
   @ApiBearerAuth()
   @UseGuards(JwtGuard)
   updateSettings(
