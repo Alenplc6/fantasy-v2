@@ -7,6 +7,7 @@ import {
   CreateAuthDto,
   CreateNewTeamDto,
   CreateSignInDto,
+  CreateSubstitutionDto,
   UpdatePasswordDto,
 } from '../dto/create-auth.dto';
 
@@ -47,5 +48,13 @@ export class AuthService {
 
   async updateProfile(user: User, updateUserDto: UpdateUserDto) {
     return await this.userService.updateProfile(user, updateUserDto);
+  }
+
+  async substitution(user: User, updateUserDto: CreateSubstitutionDto) {
+    const { oldPlayerId, newPlayerId } = updateUserDto;
+    return await this.userService.substitution(user, {
+      oldPlayerId,
+      newPlayerId,
+    });
   }
 }

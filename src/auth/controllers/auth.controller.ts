@@ -15,6 +15,7 @@ import { GetUser } from '../decorators/get.user.decorator';
 import {
   CreateNewTeamDto,
   CreateSignInDto,
+  CreateSubstitutionDto,
   UpdatePasswordDto,
 } from '../dto/create-auth.dto';
 import { JwtGuard } from '../guards/jwt.guard';
@@ -65,5 +66,15 @@ export class AuthController {
   @UseGuards(JwtGuard)
   updateProfile(@GetUser() user: User, @Body() updateUserDto: UpdateUserDto) {
     return this.authService.updateProfile(user, updateUserDto);
+  }
+
+  @Patch('substitution')
+  @ApiBearerAuth()
+  @UseGuards(JwtGuard)
+  substitution(
+    @GetUser() user: User,
+    @Body() updateUserDto: CreateSubstitutionDto,
+  ) {
+    return this.authService.substitution(user, updateUserDto);
   }
 }

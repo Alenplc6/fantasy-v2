@@ -277,4 +277,35 @@ export class UserService {
       formation,
     });
   }
+
+  async substitution(
+    user: User,
+    substitutionDto: { oldPlayerId: number; newPlayerId: number },
+  ) {
+    const newPlayer = await this.playerRepository.findOneBy({
+      id: substitutionDto.newPlayerId,
+    });
+
+    if (!newPlayer) {
+      throw new HttpException('Player dose not exist', HttpStatus.BAD_REQUEST);
+    }
+
+    const oldPlayer = await this.teamPlayerRepository.findOneBy({
+      id: substitutionDto.oldPlayerId,
+    });
+
+    if (!oldPlayer) {
+      throw new HttpException('Player dose not exist', HttpStatus.BAD_REQUEST);
+    }
+
+    await this.teamPlayerRepository.remove(oldPlayer);
+
+    const teamPlayer = new TeamPlayer();
+    teamPlayer.pid = newPlayer.pid;
+    teamPlayer.player = newPlayer; // Assign the Player entity
+    teamPlayer.user = user; // Assign the User entity
+    teamPlayer.position = newPlayer.positionName;
+    teamPlayer.isCapitan = false;
+    await this.teamPlayerRepository.save(teamPlayer);
+  }
 }

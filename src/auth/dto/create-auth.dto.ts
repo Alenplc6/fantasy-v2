@@ -103,3 +103,13 @@ export class CreateNewTeamDto {
   @ApiProperty({ type: Array, description: 'capitan' })
   capitan: [string];
 }
+
+export class CreateSubstitutionDto {
+  @IsNumber()
+  @ApiProperty({ type: Number, description: 'newPlayerId' })
+  newPlayerId: number;
+
+  @IsNumber()
+  @ApiProperty({ type: Number, description: 'oldPlayerId' })
+  oldPlayerId: number;
+}
