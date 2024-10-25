@@ -90,8 +90,6 @@ export class AuthController {
   }
 
   @Get('my-team/:id')
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
   myTeam(@Param('id') id: number) {
     return this.authService.myTeam(id);
   }
