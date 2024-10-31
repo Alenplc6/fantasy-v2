@@ -5,13 +5,17 @@ import {
   Param,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Request } from 'express';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { UpdateUserDto } from 'src/user/dto/update-user.dto';
+import { Role } from 'src/user/entities/role.enum';
 import { User } from 'src/user/entities/user.entity';
 import { GetUser } from '../decorators/get.user.decorator';
+import { Roles } from '../decorators/roles.decorator';
 import {
   CreateNewTeamDto,
   CreateSignInDto,
@@ -21,7 +25,6 @@ import {
 } from '../dto/create-auth.dto';
 import { JwtGuard } from '../guards/jwt.guard';
 import { AuthService } from '../services/auth.service';
-
 @ApiTags('Auth')
 @Controller({
   path: 'auth',
@@ -36,6 +39,7 @@ export class AuthController {
   }
 
   @Post('/login')
+  @UseGuards()
   login(@Body() createSignInDto: CreateSignInDto) {
     return this.authService.signIn(createSignInDto);
   }
@@ -56,9 +60,10 @@ export class AuthController {
   }
 
   @Get('/profile')
-  @ApiBearerAuth()
   @UseGuards(JwtGuard)
-  profile(@GetUser() user: User) {
+  @Roles(Role.ADMIN, Role.USER)
+  profile(@GetUser() user: User, @Req() req: Request) {
+    console.log(req);
     return user;
   }
 

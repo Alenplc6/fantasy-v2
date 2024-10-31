@@ -1,3 +1,29 @@
+// import {
+//   ExecutionContext,
+//   Injectable,
+//   UnauthorizedException,
+// } from '@nestjs/common';
+// import { AuthGuard } from '@nestjs/passport';
+// import { Observable } from 'rxjs';
+
+// @Injectable()
+// export class JwtGuard extends AuthGuard('jwt') {
+//   canActivate(
+//     context: ExecutionContext,
+//   ): boolean | Promise<boolean> | Observable<boolean> {
+//     return super.canActivate(context);
+//   }
+
+//   handleRequest(err, user) {
+//     if (err || !user) {
+//       console.error('Authentication error:', err);
+//       throw err || new UnauthorizedException();
+//     }
+//     console.log('Authenticated user:', user);
+//     return user;
+//   }
+// }
+
 import {
   ExecutionContext,
   Injectable,
@@ -16,7 +42,8 @@ export class JwtGuard extends AuthGuard('jwt') {
     return super.canActivate(context);
   }
 
-  handleRequest(err, user) {
+  handleRequest(err, user, info) {
+    console.log(info);
     // You can throw an exception based on either "info" or "err" arguments
     if (err || !user) {
       throw err || new UnauthorizedException();

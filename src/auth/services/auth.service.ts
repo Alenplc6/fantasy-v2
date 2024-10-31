@@ -31,7 +31,10 @@ export class AuthService {
 
     if (user) {
       // create JWT - credentials
-      const token = await this.jwtService.signAsync({ user });
+      const token = await this.jwtService.signAsync({
+        id: user.id,
+        name: user.fullName,
+      });
       return {
         user,
         token,

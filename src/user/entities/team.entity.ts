@@ -1,11 +1,11 @@
 import {
-  Entity,
-  PrimaryGeneratedColumn,
-  JoinColumn,
   Column,
   CreateDateColumn,
-  UpdateDateColumn,
+  Entity,
+  JoinColumn,
   ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
 } from 'typeorm';
 import { Player } from '../../player/entities/player.entity';
 import { User } from './user.entity';
@@ -24,6 +24,9 @@ export class TeamPlayer {
 
   @Column({ default: false })
   isCapitan: boolean;
+
+  @Column({ default: false })
+  isOnTheBench: boolean;
 
   @Column({ name: 'player_id', nullable: false })
   playerId: number;
