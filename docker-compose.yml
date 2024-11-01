@@ -23,7 +23,7 @@ services:
   # MySQL Database
   db:
     image: mysql:8
-    container_name: mysql_db
+    container_name: fantasy_mysql_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
@@ -40,7 +40,7 @@ services:
   # Redis (Optional)
   redis:
     image: redis:alpine
-    container_name: redis
+    container_name: fantasy_redis
     ports:
       - '6380:6379'
     networks:
@@ -49,7 +49,7 @@ services:
   # Adminer (Database Management UI)
   adminer:
     image: adminer
-    container_name: adminer
+    container_name: fantasy_adminer
     restart: always
     depends_on:
       - db

@@ -313,10 +313,14 @@ export class UserService {
   }
 
   async myTeam(id: number) {
-    return this.teamPlayerRepository.find({
+    const team = await this.teamPlayerRepository.find({
       where: {
         userId: id,
       },
     });
+
+    console.log(team);
+
+    return team;
   }
 }
