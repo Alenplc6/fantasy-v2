@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Controller,
   DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
-import { FantasyPointService } from '../services/fantasy-point.service';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateFantasyPointDto } from '../dto/create-fantasy-point.dto';
 import { UpdateFantasyPointDto } from '../dto/update-fantasy-point.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { FantasyPointService } from '../services/fantasy-point.service';
 
 @ApiTags('fantasy-point')
 @Controller({
@@ -29,10 +29,15 @@ export class FantasyPointController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Filter teams by query',
+  })
   findAll(
-    @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('query', new DefaultValuePipe('')) search?: string,
   ) {
     return this.fantasyPointService.findAll(search, size, page);
   }

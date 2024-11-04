@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Controller,
   DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
-import { FormationService } from '../services/formation.service';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { CreateFormationDtoOld } from '../dto/create-formation.dto';
 import { UpdateFormationDto } from '../dto/update-formation.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { FormationService } from '../services/formation.service';
 
 @ApiTags('Formation')
 @Controller({
@@ -29,10 +29,15 @@ export class FormationController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Filter teams by query',
+  })
   findAll(
-    @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('query', new DefaultValuePipe('')) search?: string,
   ) {
     return this.formationService.findAll(search, size, page);
   }

@@ -108,7 +108,6 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.userRepository.findOne({ where: { id } });
-
     if (!user) {
       throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
     }
@@ -313,14 +312,55 @@ export class UserService {
   }
 
   async myTeam(id: number) {
-    const team = await this.teamPlayerRepository.find({
-      where: {
-        userId: id,
-      },
+    const { formation } = await this.userRepository.findOne({ where: { id } });
+    const players = await this.teamPlayerRepository.findBy({ userId: id });
+
+    const { defense, midfield, offense } = formation;
+
+    const formationAlignment = [
+      { name: 'Defense', players: [] },
+      { name: 'Offense', players: [] },
+      { name: 'Mid Field', players: [] },
+      { name: 'Goal Keeper', players: [] },
+    ];
+
+    console.log(formation);
+
+    // 'goalKeeper', 'defense', 'midFielder', 'offense';
+
+    players.forEach((playerData: TeamPlayer) => {
+      // console.log(playerData);
+      if (
+        playerData.position === 'defense' &&
+        formationAlignment[0].players.length < defense
+      ) {
+        formationAlignment[0].players.push({
+          name: `${playerData.player.fullName}`,
+        });
+      } else if (
+        playerData.position === 'offense' &&
+        formationAlignment[1].players.length < offense
+      ) {
+        formationAlignment[1].players.push({
+          name: `${playerData.player.fullName}`,
+        });
+      } else if (
+        playerData.position === 'midFielder' &&
+        formationAlignment[2].players.length < midfield
+      ) {
+        formationAlignment[2].players.push({
+          name: `${playerData.player.fullName}`,
+        });
+      } else if (
+        playerData.position === 'goalKeeper' &&
+        formationAlignment[3].players.length < 1
+      ) {
+        formationAlignment[3].players.push({
+          name: `${playerData.player.fullName}`,
+        });
+      }
     });
 
-    console.log(team);
-
-    return team;
+    return formationAlignment;
   }
 }

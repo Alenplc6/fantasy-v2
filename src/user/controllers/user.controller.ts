@@ -11,7 +11,7 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
@@ -36,10 +36,15 @@ export class UserController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Filter teams by query',
+  })
   findAll(
-    @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('query', new DefaultValuePipe('')) search?: string,
   ) {
     return this.userService.findAll(search, size, page);
   }

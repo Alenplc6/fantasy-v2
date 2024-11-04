@@ -1,16 +1,16 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Param,
+  Controller,
   DefaultValuePipe,
+  Get,
+  Param,
   ParseIntPipe,
+  Post,
   Query,
 } from '@nestjs/common';
-import { GameWeekService } from '../services/game-week.service';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiQuery, ApiTags } from '@nestjs/swagger';
 import { MatchDto } from '../dto/create-game-week.dto';
+import { GameWeekService } from '../services/game-week.service';
 
 @ApiTags('Game-Week')
 @Controller({
@@ -26,11 +26,16 @@ export class GameWeekController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Filter teams by query',
+  })
   findAll(
-    @Query('query', new DefaultValuePipe('')) search: string,
     @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
     @Query('round', new DefaultValuePipe('')) round: string,
+    @Query('query', new DefaultValuePipe('')) search?: string,
     // @Query('startDate') startDate?: string, // Make startDate optional
     // @Query('endDate') endDate?: string, // Make endDate optional
   ) {

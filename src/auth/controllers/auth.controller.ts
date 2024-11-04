@@ -44,6 +44,11 @@ export class AuthController {
     return this.authService.signIn(createSignInDto);
   }
 
+  @Get('my-team/:id')
+  myTeam(@Param('id') id: number) {
+    return this.authService.myTeam(id);
+  }
+
   @Patch('/create-team/:id')
   createTeam(@Param('id') id: string, @Body() createTeamDto: CreateNewTeamDto) {
     return this.authService.createTeam(id, createTeamDto);
@@ -92,10 +97,5 @@ export class AuthController {
     @Body() updateUserDto: CreateSubstitutionDto,
   ) {
     return this.authService.substitution(user, updateUserDto);
-  }
-
-  @Get('my-team/:id')
-  myTeam(@Param('id') id: number) {
-    return this.authService.myTeam(id);
   }
 }
