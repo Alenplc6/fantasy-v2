@@ -317,50 +317,49 @@ export class UserService {
 
     const { defense, midfield, offense } = formation;
 
-    const formationAlignment = [
+    const myTeam = [
       { name: 'Defense', players: [] },
       { name: 'Offense', players: [] },
       { name: 'Mid Field', players: [] },
       { name: 'Goal Keeper', players: [] },
     ];
 
-    console.log(formation);
-
-    // 'goalKeeper', 'defense', 'midFielder', 'offense';
-
     players.forEach((playerData: TeamPlayer) => {
-      // console.log(playerData);
       if (
         playerData.position === 'defense' &&
-        formationAlignment[0].players.length < defense
+        myTeam[0].players.length < defense
       ) {
-        formationAlignment[0].players.push({
+        myTeam[0].players.push({
+          id: playerData.id,
           name: `${playerData.player.fullName}`,
         });
       } else if (
         playerData.position === 'offense' &&
-        formationAlignment[1].players.length < offense
+        myTeam[1].players.length < offense
       ) {
-        formationAlignment[1].players.push({
+        myTeam[1].players.push({
+          id: playerData.id,
           name: `${playerData.player.fullName}`,
         });
       } else if (
         playerData.position === 'midFielder' &&
-        formationAlignment[2].players.length < midfield
+        myTeam[2].players.length < midfield
       ) {
-        formationAlignment[2].players.push({
+        myTeam[2].players.push({
+          id: playerData.id,
           name: `${playerData.player.fullName}`,
         });
       } else if (
         playerData.position === 'goalKeeper' &&
-        formationAlignment[3].players.length < 1
+        myTeam[3].players.length < 1
       ) {
-        formationAlignment[3].players.push({
+        myTeam[3].players.push({
+          id: playerData.id,
           name: `${playerData.player.fullName}`,
         });
       }
     });
 
-    return formationAlignment;
+    return myTeam;
   }
 }
