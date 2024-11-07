@@ -125,7 +125,6 @@ export class UserService {
     return { message: 'User removed successfully' };
   }
 
-  //update password
   // password update
   async updatePassword(
     user: User,
