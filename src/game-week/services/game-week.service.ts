@@ -193,7 +193,7 @@ export class GameWeekService {
     q: string,
     page: number,
     pageSize: number,
-    round?: string,
+    // round?: string,
     // startDate?: Date,
     // endDate?: Date,
   ) {
@@ -206,7 +206,7 @@ export class GameWeekService {
       }); // Case-insensitive search
 
     query.andWhere('gameWeek.round = :round', {
-      round: round ? round.toString() : this.weeksSince('2024-08-16'),
+      round: this.weeksSince('2024-08-16').toString(),
     });
 
     // if (startDate) {
