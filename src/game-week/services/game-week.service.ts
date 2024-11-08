@@ -1,19 +1,19 @@
+import { HttpService } from '@nestjs/axios';
+import { InjectQueue } from '@nestjs/bullmq';
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
-import { GameWeek } from '../entities/game-week.entity';
-import { Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { SchedulerRegistry } from '@nestjs/schedule';
+import { InjectRepository } from '@nestjs/typeorm';
+import { AxiosError, AxiosResponse } from 'axios';
+import { Queue } from 'bullmq';
 import { CronJob } from 'cron';
 import { catchError, firstValueFrom, map } from 'rxjs';
-import { HttpService } from '@nestjs/axios';
-import { AxiosError, AxiosResponse } from 'axios';
-import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { PlayerPoint } from 'src/player-point/entities/player-point.entity';
+import { Repository } from 'typeorm';
+import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
 import { MatchDto } from '../dto/create-game-week.dto';
-import { GameWeekTeam } from '../entities/team-game-week';
 import { Competition } from '../entities/competition';
+import { GameWeek } from '../entities/game-week.entity';
+import { GameWeekTeam } from '../entities/team-game-week';
 import { Venue } from '../entities/venue';
 
 @Injectable()
@@ -175,6 +175,20 @@ export class GameWeekService {
   //   };
   // }
 
+  weeksSince(dateString: string): number {
+    const givenDate: Date = new Date(dateString);
+    const currentDate: Date = new Date();
+
+    // Calculate the difference in milliseconds
+    const diffInMs: number = currentDate.getTime() - givenDate.getTime();
+
+    // Convert milliseconds to days, then to weeks
+    const weeksPassed: number = Math.floor(
+      diffInMs / (1000 * 60 * 60 * 24 * 7),
+    );
+    return weeksPassed;
+  }
+
   async findAll(
     q: string,
     page: number,
@@ -191,10 +205,9 @@ export class GameWeekService {
         tname: `%${q.toLocaleLowerCase()}%`,
       }); // Case-insensitive search
 
-    // Add optional round filter
-    if (round) {
-      query.andWhere('gameWeek.round = :round', { round: round.toString() });
-    }
+    query.andWhere('gameWeek.round = :round', {
+      round: round ? round.toString() : this.weeksSince('2024-08-16'),
+    });
 
     // if (startDate) {
     //   query.andWhere('gameWeek.datestart >= :startDate', { startDate });
