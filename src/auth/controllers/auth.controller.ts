@@ -49,6 +49,11 @@ export class AuthController {
     return this.authService.myTeam(id);
   }
 
+  @Get('my-bench/:id')
+  benchPlayers(@Param('id') id: number) {
+    return this.authService.benchPlayers(id);
+  }
+
   @Patch('/create-team/:id')
   createTeam(@Param('id') id: string, @Body() createTeamDto: CreateNewTeamDto) {
     return this.authService.createTeam(id, createTeamDto);

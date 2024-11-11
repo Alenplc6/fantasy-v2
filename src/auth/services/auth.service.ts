@@ -69,4 +69,8 @@ export class AuthService {
   async myTeam(id: number) {
     return await this.userService.myTeam(id);
   }
+
+  async benchPlayers(id: number) {
+    return await this.userService.benchPlayers(id);
+  }
 }

@@ -361,4 +361,14 @@ export class UserService {
 
     return myTeam;
   }
+
+  async benchPlayers(id: number) {
+    return await this.teamPlayerRepository
+      .createQueryBuilder('teamPlayer')
+      .leftJoinAndSelect('teamPlayer.player', 'player')
+      // .select('player.fullName', 'name')
+      .where({ userId: id })
+      .take(5) // Limit the number of results
+      .getMany();
+  }
 }

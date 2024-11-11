@@ -43,7 +43,6 @@ export class GameWeekController {
       search,
       page,
       size,
-      round,
       // new Date(startDate),
       // new Date(endDate),
     );
