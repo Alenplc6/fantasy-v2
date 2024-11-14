@@ -1,5 +1,5 @@
 // src/entities/Venue.ts
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Venue {
@@ -15,12 +15,12 @@ export class Venue {
   @Column()
   location: string;
 
-  @Column({ nullable: true })
+  @Column()
   founded: string;
 
   @Column()
   capacity: string;
 
-  @Column({ nullable: true })
+  @Column()
   googlecoords: string;
 }

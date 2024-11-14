@@ -1,32 +1,33 @@
+import { ExpressAdapter } from '@bull-board/express';
+import { BullBoardModule } from '@bull-board/nestjs';
+import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
-import { User } from './user/entities/user.entity';
-import { PlayerModule } from './player/player.module';
-import { FantasyPointModule } from './fantasy-point/fantasy-point.module';
-import { PlayerPointModule } from './player-point/player-point.module';
-import { GameWeekModule } from './game-week/game-week.module';
-import { Player } from './player/entities/player.entity';
-import { TeamPlayer } from './user/entities/team.entity';
-import { GameWeek } from './game-week/entities/game-week.entity';
-import { ScheduleModule } from '@nestjs/schedule';
-import { HttpModule } from '@nestjs/axios';
 import { FantasyPoint } from './fantasy-point/entities/fantasy-point.entity';
-import { PlayerPoint } from './player-point/entities/player-point.entity';
-import { BullBoardModule } from '@bull-board/nestjs';
-import { ExpressAdapter } from '@bull-board/express';
-import { HighlightModule } from './highlight/highlight.module';
-import { NewsModule } from './news/news.module';
-import { TeamModule } from './team/team.module';
-import { Team } from './team/entities';
-import { FormationModule } from './formation/formation.module';
-import { News } from './news/entities/news.entity';
+import { FantasyPointModule } from './fantasy-point/fantasy-point.module';
 import { Formation } from './formation/entities/formation.entity';
+import { FormationModule } from './formation/formation.module';
+import { GameWeek } from './game-week/entities/game-week.entity';
+import { GameWeekModule } from './game-week/game-week.module';
 import { Highlight } from './highlight/entities/highlight.entity';
+import { HighlightModule } from './highlight/highlight.module';
+import { JobsModule } from './jobs/jobs.module';
+import { News } from './news/entities/news.entity';
+import { NewsModule } from './news/news.module';
+import { PlayerPoint } from './player-point/entities/player-point.entity';
+import { PlayerPointModule } from './player-point/player-point.module';
+import { Player } from './player/entities/player.entity';
+import { PlayerModule } from './player/player.module';
+import { Team } from './team/entities';
+import { TeamModule } from './team/team.module';
+import { TeamPlayer } from './user/entities/team.entity';
+import { User } from './user/entities/user.entity';
+import { UserModule } from './user/user.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -75,6 +76,7 @@ import { Highlight } from './highlight/entities/highlight.entity';
     NewsModule,
     TeamModule,
     FormationModule,
+    JobsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

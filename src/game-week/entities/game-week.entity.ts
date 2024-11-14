@@ -1,13 +1,15 @@
 // src/entities/Match.ts
 import {
-  Entity,
-  PrimaryGeneratedColumn,
+  BeforeInsert,
   Column,
-  OneToOne,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { GameWeekTeam } from './team-game-week';
 import { Competition } from './competition';
+import { GameWeekTeam } from './team-game-week';
 import { Venue } from './venue';
 
 @Entity()
@@ -31,22 +33,28 @@ export class GameWeek {
     winner: string;
   };
 
-  @OneToOne(() => GameWeekTeam, { eager: true, cascade: true })
+  @ManyToOne(() => GameWeekTeam, { eager: true, cascade: true })
   @JoinColumn({ name: 'home_team_id' })
   home_team: GameWeekTeam;
 
-  @OneToOne(() => GameWeekTeam, { eager: true, cascade: true })
+  @ManyToOne(() => GameWeekTeam, { eager: true, cascade: true })
   @JoinColumn({ name: 'away_team_id' })
   away_team: GameWeekTeam;
 
-  @Column({ nullable: true })
-  periods: string;
+  @Column('json', {
+    nullable: true,
+  })
+  periods: {
+    p1: { home: number; away: number };
+    p2: { home: number; away: number };
+    ft: { home: number; away: number };
+  };
 
-  @Column()
-  datestart: string;
+  @Column('datetime', { default: () => 'CURRENT_TIMESTAMP', nullable: true })
+  datestart: Date;
 
-  @Column()
-  dateend: string;
+  @Column('datetime', { default: () => 'CURRENT_TIMESTAMP', nullable: true })
+  dateend: Date;
 
   @Column()
   timestampstart: string;
@@ -73,10 +81,10 @@ export class GameWeek {
   gamestate: string;
 
   @Column()
-  pre_squad: boolean;
+  pre_squad: string;
 
   @Column()
-  verified: boolean;
+  verified: string;
 
   @Column({ nullable: true })
   periodlength: string;
@@ -94,19 +102,30 @@ export class GameWeek {
   @JoinColumn()
   competition: Competition;
 
-  @OneToOne(() => Venue, { eager: true, cascade: true })
+  @ManyToOne(() => Venue, { eager: true, cascade: true })
   @JoinColumn()
   venue: Venue;
 
   @Column()
-  lineupavailable: boolean;
+  lineupavailable: string;
 
   @Column()
-  projectionavailable: boolean;
+  projectionavailable: string;
 
   @Column()
-  eventavailable: boolean;
+  eventavailable: string;
 
   @Column()
-  commentaryavailable: boolean;
+  commentaryavailable: string;
+
+  @BeforeInsert()
+  setDefaultPeriods() {
+    if (!this.periods) {
+      this.periods = {
+        p1: { home: 0, away: 0 },
+        p2: { home: 0, away: 0 },
+        ft: { home: 0, away: 0 },
+      };
+    }
+  }
 }

@@ -1,19 +1,20 @@
-import { Module } from '@nestjs/common';
-import { PlayerService } from './services/player.service';
-import { PlayerController } from './controllers/player.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Player } from './entities/player.entity';
-import { User } from '../user/entities/user.entity';
-import { HttpModule } from '@nestjs/axios';
-import { PlayerProcessor } from './processors/player.processor';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { BullBoardModule } from '@bull-board/nestjs';
+import { HttpModule } from '@nestjs/axios';
 import { BullModule } from '@nestjs/bullmq';
+import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { GameWeekTeam } from 'src/game-week/entities/team-game-week';
+import { User } from '../user/entities/user.entity';
+import { PlayerController } from './controllers/player.controller';
+import { Player } from './entities/player.entity';
+import { PlayerProcessor } from './processors/player.processor';
+import { PlayerService } from './services/player.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Player]),
+    TypeOrmModule.forFeature([User, Player, GameWeekTeam]),
     HttpModule,
     BullModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({

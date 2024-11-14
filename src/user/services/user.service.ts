@@ -184,6 +184,8 @@ export class UserService {
       );
     }
 
+    console.log(formationData);
+
     await this.userRepository.update(id, {
       teamName,
       coachName,
@@ -363,12 +365,19 @@ export class UserService {
   }
 
   async benchPlayers(id: number) {
-    return await this.teamPlayerRepository
+    const teamPlayers = await this.teamPlayerRepository
       .createQueryBuilder('teamPlayer')
-      .leftJoinAndSelect('teamPlayer.player', 'player')
-      // .select('player.fullName', 'name')
+      .leftJoinAndSelect('teamPlayer.player', 'player') // Join with Player entity
       .where({ userId: id })
-      .take(5) // Limit the number of results
+      .select(['teamPlayer', 'player.fullName']) // Select only the teamPlayer and player.fullName
+      .take(5)
       .getMany();
+
+    return teamPlayers.map((teamPlayer) => {
+      return {
+        ...teamPlayer,
+        name: teamPlayer.player.fullName, // Rename fullName to name
+      };
+    });
   }
 }

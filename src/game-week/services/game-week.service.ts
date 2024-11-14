@@ -10,7 +10,6 @@ import { catchError, firstValueFrom, map } from 'rxjs';
 import { PlayerPoint } from 'src/player-point/entities/player-point.entity';
 import { Repository } from 'typeorm';
 import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
-import { MatchDto } from '../dto/create-game-week.dto';
 import { Competition } from '../entities/competition';
 import { GameWeek } from '../entities/game-week.entity';
 import { GameWeekTeam } from '../entities/team-game-week';
@@ -132,12 +131,6 @@ export class GameWeekService {
     });
   }
 
-  // Create a new match
-  async create(matchData: Partial<MatchDto>): Promise<GameWeek> {
-    const match = this.gameWeekRepository.create(matchData);
-    return await this.gameWeekRepository.save(match);
-  }
-
   async sync() {
     const data = await this.gameWeekRepository.find({
       where: { status_str: 'upcoming' },
@@ -145,35 +138,12 @@ export class GameWeekService {
 
     for (let i = 0; i < data.length; i++) {
       const { mid, datestart } = data[i];
-      const date = this.convertDateToCron(datestart);
+      const date = this.convertDateToCron(datestart.toString());
       this.addCronJob(`match-${mid}`, date, +mid);
     }
 
     return { message: 'Game Week Seed Successful' };
   }
-
-  // async findAll(q: string, pageSize: number, page: number) {
-  //   const [data, total] = await this.gameWeekRepository.findAndCount({
-  //     where: {
-  //       home_team: {
-  //         tname: ILike(`%${q.toLocaleLowerCase()}%`),
-  //       },
-  //     },
-  //     skip: (page - 1) * pageSize, // calculate the offset
-  //     take: pageSize, // limit the number of results
-  //     order: {
-  //       // Sort results, e.g., by `id` column
-  //       id: 'ASC',
-  //     },
-  //   });
-
-  //   return {
-  //     data, // paginated data
-  //     total, // total number of records
-  //     currentPage: page,
-  //     pageSize,
-  //   };
-  // }
 
   weeksSince(dateString: string): number {
     const givenDate: Date = new Date(dateString);
@@ -201,21 +171,10 @@ export class GameWeekService {
       .createQueryBuilder('gameWeek')
       .leftJoinAndSelect('gameWeek.home_team', 'homeTeam') // Ensure this is the correct relationship
       .leftJoinAndSelect('gameWeek.away_team', 'awayTeam') // Ensure this is the correct relationship
+      .leftJoinAndSelect('gameWeek.venue', 'venue') // Ensure this is the correct relationship
       .where('LOWER(homeTeam.tname) LIKE LOWER(:tname)', {
         tname: `%${q.toLocaleLowerCase()}%`,
       }); // Case-insensitive search
-
-    query.andWhere('gameWeek.round = :round', {
-      round: this.weeksSince('2024-08-16').toString(),
-    });
-
-    // if (startDate) {
-    //   query.andWhere('gameWeek.datestart >= :startDate', { startDate });
-    // }
-
-    // if (endDate) {
-    //   query.andWhere('gameWeek.datestart <= :endDate', { endDate });
-    // }
 
     const [data, total] = await query
       .skip((page - 1) * pageSize) // Calculate the offset
@@ -249,25 +208,57 @@ export class GameWeekService {
       try {
         const teams = await this.httpService
           .get(
-            `https://soccer.entitysport.com/competition/1118/matches?token=${process.env.ENTITY_SPORT_TOKEN}&status=2&per_page=${perPage}&paged=${currentPage}`,
+            `https://soccer.entitysport.com/competition/1118/matches?token=${process.env.ENTITY_SPORT_TOKEN}&per_page=${perPage}&paged=${currentPage}`,
           )
           .pipe(map((response: AxiosResponse) => response.data.response.items))
           .toPromise();
 
         if (!teams || teams.length === 0) {
           console.log('No more teams to fetch. Ending process.');
-          break;
+          // break;
         }
 
         for (const teamData of teams) {
-          const homeTeam = this.gameWeekTeamRepository.create(
-            teamData.teams.home,
-          );
-          const awayTeam = this.gameWeekTeamRepository.create(
-            teamData.teams.away,
-          );
+          let homeTeam: any;
+          let awayTeam: any;
+          let competitionVenue: any;
+          const home = await this.gameWeekTeamRepository.findBy({
+            tid: teamData.teams.home.tid,
+          });
+          // console.log(teamData.teams);
+          if (home.length > 0) {
+            homeTeam = home[0];
+          } else {
+            homeTeam = await this.gameWeekTeamRepository.create(
+              teamData.teams.home,
+            );
+          }
+
+          const away = await this.gameWeekTeamRepository.findBy({
+            tid: teamData.teams.away.tid,
+          });
+
+          if (away.length > 0) {
+            awayTeam = away[0];
+          } else {
+            awayTeam = this.gameWeekTeamRepository.create(teamData.teams.away);
+          }
+
+          const venue = await this.venueRepository.findBy({
+            venueid: teamData.venue.venueid,
+          });
+
+          if (venue.length > 0) {
+            competitionVenue = venue[0];
+          } else {
+            competitionVenue = await this.venueRepository.create(
+              teamData.venue,
+            );
+          }
+
           const team = this.gameWeekRepository.create({
             ...teamData,
+            venue: competitionVenue,
             home_team: homeTeam,
             away_team: awayTeam,
           });
@@ -276,7 +267,6 @@ export class GameWeekService {
 
         console.log(`Processed page ${currentPage}`);
         currentPage++;
-
         // Wait for 1 second before the next API call
         await delay(1000);
       } catch (error) {
@@ -287,7 +277,123 @@ export class GameWeekService {
         break;
       }
     }
-
+    currentPage++;
     return { message: 'Team fetching and saving process completed' };
+  }
+
+  async getTeamStat() {
+    const results = await this.gameWeekRepository
+      .createQueryBuilder('match')
+      .select('home_team.id', 'id')
+      .addSelect('home_team.tname', 'team_name')
+      .addSelect('ANY_VALUE(home_team.logo)', 'logo')
+      .addSelect(
+        `CAST(SUM(CASE 
+          WHEN JSON_EXTRACT(match.result, '$.winner') = 'home' AND match.home_team.id = home_team.id 
+          THEN 1 
+          WHEN JSON_EXTRACT(match.result, '$.winner') = 'away' AND match.away_team.id = home_team.id 
+          THEN 1 
+          ELSE 0 
+         END) AS UNSIGNED)`,
+        'wins',
+      )
+      .addSelect(
+        `SUM(CASE 
+          WHEN match.home_team.id = home_team.id 
+          THEN JSON_EXTRACT(match.periods, '$.ft.home') 
+          ELSE JSON_EXTRACT(match.periods, '$.ft.away') 
+         END)`,
+        'goals_scored',
+      )
+      .addSelect(
+        `CAST(SUM(CASE 
+          WHEN JSON_EXTRACT(match.result, '$.winner') = 'away' AND match.home_team.id = home_team.id 
+          THEN 1 
+          WHEN JSON_EXTRACT(match.result, '$.winner') = 'home' AND match.away_team.id = home_team.id 
+          THEN 1 
+          ELSE 0 
+         END) AS UNSIGNED)`,
+        'losses',
+      )
+      .addSelect(
+        `CAST(SUM(CASE 
+          WHEN JSON_EXTRACT(match.result, '$.winner') = '' OR JSON_EXTRACT(match.result, '$.winner') IS NULL 
+          THEN 1 
+          ELSE 0 
+         END) AS UNSIGNED)`,
+        'draws',
+      )
+      .addSelect(`CAST(COUNT(*) AS UNSIGNED)`, 'games_played')
+      .addSelect(
+        `SUM(CASE 
+          WHEN match.home_team.id = home_team.id 
+          THEN JSON_EXTRACT(match.periods, '$.ft.away') 
+          ELSE JSON_EXTRACT(match.periods, '$.ft.home') 
+         END)`,
+        'goals_received',
+      )
+      .addSelect(
+        `SUM(CASE 
+          WHEN match.home_team.id = home_team.id 
+          THEN JSON_EXTRACT(match.periods, '$.ft.home') 
+          ELSE JSON_EXTRACT(match.periods, '$.ft.away') 
+         END) 
+       - 
+     SUM(CASE 
+          WHEN match.home_team.id = home_team.id 
+          THEN JSON_EXTRACT(match.periods, '$.ft.away') 
+          ELSE JSON_EXTRACT(match.periods, '$.ft.home') 
+         END)`,
+        'goal_difference',
+      )
+      .addSelect(
+        `DENSE_RANK() OVER (ORDER BY 
+          SUM(CASE 
+                WHEN JSON_EXTRACT(match.result, '$.winner') = 'home' AND match.home_team.id = home_team.id 
+                THEN 1 
+                WHEN JSON_EXTRACT(match.result, '$.winner') = 'away' AND match.away_team.id = home_team.id 
+                THEN 1 
+                ELSE 0 
+              END) DESC
+        )`,
+        'rank',
+      )
+      .innerJoin('match.home_team', 'home_team')
+      .innerJoin('match.away_team', 'away_team')
+      .where('match.gamestate_str = :gamestate', { gamestate: 'Ended' })
+      .groupBy('home_team.id')
+      .getRawMany();
+
+    return results;
+  }
+
+  async getSingleTeamGames(
+    id: number,
+    q: string,
+    page: number,
+    pageSize: number,
+  ) {
+    const query = this.gameWeekRepository
+      .createQueryBuilder('gameWeek')
+      .leftJoinAndSelect('gameWeek.home_team', 'homeTeam') // Ensure this is the correct relationship
+      .leftJoinAndSelect('gameWeek.away_team', 'awayTeam') // Ensure this is the correct relationship
+      .leftJoinAndSelect('gameWeek.venue', 'venue') // Ensure this is the correct relationship
+      .where('LOWER(homeTeam.tname) LIKE LOWER(:tname)', {
+        tname: `%${q.toLocaleLowerCase()}%`,
+      })
+      .andWhere('homeTeam.id = :id', { id });
+
+    const [data, total] = await query
+      .skip((page - 1) * pageSize) // Calculate the offset
+      .take(pageSize) // Limit the number of results
+      .orderBy('gameWeek.datestart', 'ASC') // Sort results by `id` column
+      .getManyAndCount(); // Execute the query and get results
+
+    return {
+      data,
+      total,
+      currentPage: page,
+      pageSize,
+    }; // Return the results
   }
 }

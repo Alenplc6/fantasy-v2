@@ -1,18 +1,18 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { CreateTeamDto } from '../dto/create-team.dto';
-import { UpdateTeamDto } from '../dto/update-team.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Team } from '../entities';
-import { Repository } from 'typeorm';
 import { HttpService } from '@nestjs/axios';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
 import { map } from 'rxjs';
+import { GameWeekTeam } from 'src/game-week/entities/team-game-week';
+import { Repository } from 'typeorm';
+import { CreateTeamDto } from '../dto/create-team.dto';
+import { UpdateTeamDto } from '../dto/update-team.dto';
 
 @Injectable()
 export class TeamService {
   constructor(
-    @InjectRepository(Team)
-    private readonly teamRepository: Repository<Team>,
+    @InjectRepository(GameWeekTeam)
+    private readonly teamRepository: Repository<GameWeekTeam>,
     private readonly httpService: HttpService,
   ) {}
 
