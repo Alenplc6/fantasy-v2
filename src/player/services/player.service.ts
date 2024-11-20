@@ -232,7 +232,7 @@ export class PlayerService {
       },
     });
 
-    console.log(teams[0]);
+    // console.log(teams[0]);
     try {
       for (let j = 0; j < teams.length; j++) {
         const response = await this.httpService
@@ -243,18 +243,27 @@ export class PlayerService {
         const points =
           response.data.response.items != null
             ? response.data.response.items?.fantasy_points
-            : [];
-
-        console.log(points);
-        if (points.length > 0) {
-          const fantasyPoints = [...points.home, ...points.away];
-          for (let i = 0; i < fantasyPoints.length; i++) {
-            const fantasyPoint = this.fantasyPointRepository.create({
-              ...fantasyPoints[i],
-            });
-            this.fantasyPointRepository.save(fantasyPoint);
+            : null;
+        if (points.home != null && points.away != null) {
+          if (points.home.length > 0 && points.away.length > 0) {
+            const fantasyPoints = [...points.home, ...points.away];
+            // console.log(points.home[0]);
+            if (fantasyPoints.length > 0) {
+              for (let i = 0; i < fantasyPoints.length; i++) {
+                const fantasyPoint = this.fantasyPointRepository.create({
+                  mid: teams[j].mid,
+                  ...fantasyPoints[i],
+                });
+                console.log(fantasyPoint);
+                await this.fantasyPointRepository.save(fantasyPoint);
+              }
+            }
+          } else {
+            // continue;
+            console.log(points);
           }
         }
+        console.log(points.home != null);
       }
 
       return { message: 'Player sinc success' };
