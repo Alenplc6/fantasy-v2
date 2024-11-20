@@ -6,6 +6,8 @@ import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { GameWeekTeam } from 'src/game-week/entities/team-game-week';
+import { FantasyPoint } from '../fantasy-point/entities/fantasy-point.entity';
+import { GameWeek } from '../game-week/entities/game-week.entity';
 import { User } from '../user/entities/user.entity';
 import { PlayerController } from './controllers/player.controller';
 import { Player } from './entities/player.entity';
@@ -14,7 +16,13 @@ import { PlayerService } from './services/player.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Player, GameWeekTeam]),
+    TypeOrmModule.forFeature([
+      User,
+      Player,
+      GameWeekTeam,
+      FantasyPoint,
+      GameWeek,
+    ]),
     HttpModule,
     BullModule.forRootAsync({
       useFactory: async (configService: ConfigService) => ({

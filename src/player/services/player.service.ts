@@ -14,8 +14,10 @@ import {
   of,
   tap,
 } from 'rxjs';
+import { FantasyPoint } from 'src/fantasy-point/entities/fantasy-point.entity';
 import { GameWeekTeam } from 'src/game-week/entities/team-game-week';
 import { ILike, Repository } from 'typeorm';
+import { GameWeek } from '../../game-week/entities/game-week.entity';
 import { CreatePlayerDto } from '../dto/create-player.dto';
 import { UpdatePlayerDto } from '../dto/update-player.dto';
 import { Player } from '../entities/player.entity';
@@ -26,8 +28,12 @@ export class PlayerService {
   constructor(
     @InjectRepository(Player)
     private readonly playerRepository: Repository<Player>,
+    @InjectRepository(FantasyPoint)
+    private readonly fantasyPointRepository: Repository<FantasyPoint>,
     @InjectRepository(GameWeekTeam)
     private readonly gameWeekTeamRepository: Repository<GameWeekTeam>,
+    @InjectRepository(GameWeek)
+    private readonly gameWeekRepository: Repository<GameWeek>,
     @InjectQueue('player-queue') private readonly playerQueue: Queue,
     private readonly httpService: HttpService,
   ) {}
@@ -211,6 +217,53 @@ export class PlayerService {
           HttpStatus.INTERNAL_SERVER_ERROR,
         );
       }
+    }
+
+    return {
+      message: 'player data has been already seed',
+    };
+  }
+
+  async fetchFantasyPointData(): Promise<any> {
+    // const plenght = await this.playerRepository.count();
+    const teams = await this.gameWeekRepository.find({
+      where: {
+        gamestate_str: 'Ended',
+      },
+    });
+
+    console.log(teams[0]);
+    try {
+      for (let j = 0; j < teams.length; j++) {
+        const response = await this.httpService
+          .get(
+            `https://soccer.entitysport.com/matches/${teams[j].mid}/newfantasy?token=${process.env.ENTITY_SPORT_TOKEN}`,
+          )
+          .toPromise();
+        const points =
+          response.data.response.items != null
+            ? response.data.response.items?.fantasy_points
+            : [];
+
+        console.log(points);
+        if (points.length > 0) {
+          const fantasyPoints = [...points.home, ...points.away];
+          for (let i = 0; i < fantasyPoints.length; i++) {
+            const fantasyPoint = this.fantasyPointRepository.create({
+              ...fantasyPoints[i],
+            });
+            this.fantasyPointRepository.save(fantasyPoint);
+          }
+        }
+      }
+
+      return { message: 'Player sinc success' };
+    } catch (error) {
+      console.error('Error fetching data from external API:', error);
+      throw new HttpException(
+        'Failed to fetch data',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     return {

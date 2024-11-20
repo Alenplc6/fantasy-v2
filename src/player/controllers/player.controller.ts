@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Post,
   Body,
-  Patch,
-  Param,
-  Delete,
+  Controller,
   DefaultValuePipe,
+  Delete,
+  Get,
+  Param,
   ParseIntPipe,
+  Patch,
+  Post,
   Query,
 } from '@nestjs/common';
-import { PlayerService } from '../services/player.service';
+import { ApiTags } from '@nestjs/swagger';
 import { CreatePlayerDto } from '../dto/create-player.dto';
 import { UpdatePlayerDto } from '../dto/update-player.dto';
-import { ApiTags } from '@nestjs/swagger';
+import { PlayerService } from '../services/player.service';
 
 @ApiTags('player')
 @Controller({
@@ -50,6 +50,11 @@ export class PlayerController {
   @Get('sync-plyers')
   findAllPlayers() {
     return this.playerService.fetchExternalData();
+  }
+
+  @Get('sync-fantasy')
+  fetchFantasyPointData() {
+    return this.playerService.fetchFantasyPointData();
   }
 
   // @Get(':position')

@@ -366,7 +366,6 @@ export class GameWeekService {
 
     return results;
   }
-
   async getSingleTeamGames(
     id: number,
     q: string,

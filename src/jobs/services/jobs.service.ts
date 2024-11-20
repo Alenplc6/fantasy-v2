@@ -4,6 +4,7 @@ import { SchedulerRegistry } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosError } from 'axios';
 import { CronJob } from 'cron';
+import * as moment from 'moment';
 import { catchError, firstValueFrom } from 'rxjs';
 import { Repository } from 'typeorm';
 import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
@@ -70,7 +71,8 @@ export class JobsService {
 
   // convert the date to cron job param
   private _convertDateToCron(dateString: string): string {
-    const date = new Date(dateString);
+    console.log(dateString);
+    const date = new Date(moment(dateString).format());
 
     // Extract minute, hour, day, and month
     const minute = date.getUTCMinutes();
@@ -79,7 +81,7 @@ export class JobsService {
     const month = date.getUTCMonth() + 1;
     const weekDay = date.getDay();
 
-    return `1 ${minute} ${hour} ${day} ${month} ${weekDay}`;
+    return `1 ${minute} ${hour} ${day} ${month} *`;
   }
 
   async _updateFantasyPoints(mid: string) {
@@ -120,24 +122,42 @@ export class JobsService {
       status_str: 'upcoming',
     });
 
-    for (let i = 0; i < matches.length; i++) {
-      this.syncGameWeekSchedule(
-        matches[i].mid,
-        this._convertDateToCron(matches[i].datestart.toISOString()),
-        `${matches[i].mid}-match`,
-      );
-      console.log(this._convertDateToCron(matches[i].datestart.toDateString()));
-    }
+    const date = new Date();
+    console.log(
+      'Date',
+      this._convertDateToCron(new Date('2024-11-18 20:50:13').toISOString()),
+    );
+    this.syncGameWeekSchedule(
+      '250794',
+      this._convertDateToCron(new Date('2024-11-18 20:50:13').toISOString()),
+      `250794`,
+    );
+    // for (let i = 0; i < matches.length; i++) {
+    //   this.syncGameWeekSchedule(
+    //     matches[i].mid,
+    //     this._convertDateToCron(matches[i].datestart.toISOString()),
+    //     `${matches[i].mid}-match`,
+    //   );
+    //   console.log(this._convertDateToCron(matches[i].datestart.toDateString()));
+    // }
     return matches.length;
   }
 
   syncGameWeekSchedule(mid: string, time: string, name: string) {
-    const job = new CronJob(`${time}`, () => {
-      this._updateFantasyPoints(mid);
-      this.logger.warn(`time (${time}) for job schedule to run!`);
+    console.log(time);
+    const job = new CronJob('* 57 20 18 11 *', () => {
+      try {
+        this._updateFantasyPoints(mid);
+        this.logger.warn(`Job executed at time (${new Date().toISOString()})`);
+      } catch (error) {
+        this.logger.error(`Error executing job: ${error.message}`);
+      }
     });
 
-    this.schedulerRegistry.addCronJob(name, job);
+    this.schedulerRegistry.addCronJob(
+      `${name}-${Math.random() * 100000000}`,
+      job,
+    );
     job.start();
 
     this.logger.warn(`job ${name} added for ${time}!`);
