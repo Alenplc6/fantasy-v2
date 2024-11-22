@@ -285,8 +285,8 @@ export class UserService {
     user: User,
     substitutionDto: { oldPlayerId: number; newPlayerId: number },
   ) {
-    const newPlayer = await this.playerRepository.findOneBy({
-      id: substitutionDto.newPlayerId,
+    const newPlayer = await this.teamPlayerRepository.findOneBy({
+      playerId: substitutionDto.newPlayerId,
     });
 
     if (!newPlayer) {
@@ -301,15 +301,23 @@ export class UserService {
       throw new HttpException('Player dose not exist', HttpStatus.BAD_REQUEST);
     }
 
-    await this.teamPlayerRepository.remove(oldPlayer);
+    console.log(oldPlayer, newPlayer);
+    // await this.teamPlayerRepository.remove(oldPlayer);
+    await this.teamPlayerRepository.update(oldPlayer.id, {
+      isOnTheBench: true,
+    });
 
-    const teamPlayer = new TeamPlayer();
-    teamPlayer.pid = newPlayer.pid;
-    teamPlayer.player = newPlayer; // Assign the Player entity
-    teamPlayer.user = user; // Assign the User entity
-    teamPlayer.position = newPlayer.positionName;
-    teamPlayer.isCapitan = false;
-    await this.teamPlayerRepository.save(teamPlayer);
+    await this.teamPlayerRepository.update(newPlayer.id, {
+      isOnTheBench: false,
+    });
+
+    // const teamPlayer = new TeamPlayer();
+    // teamPlayer.pid = newPlayer.pid;
+    // teamPlayer.player = newPlayer; // Assign the Player entity
+    // teamPlayer.user = user; // Assign the User entity
+    // teamPlayer.position = newPlayer.positionName;
+    // teamPlayer.isCapitan = false;
+    // await this.teamPlayerRepository.save(teamPlayer);
   }
 
   async myTeam(id: number) {
