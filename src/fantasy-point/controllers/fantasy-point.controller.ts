@@ -42,6 +42,11 @@ export class FantasyPointController {
     return this.fantasyPointService.findAll(search, size, page);
   }
 
+  @Get('grouped')
+  async getGroupedStats() {
+    return await this.fantasyPointService.getGroupedData();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.fantasyPointService.findOne(+id);

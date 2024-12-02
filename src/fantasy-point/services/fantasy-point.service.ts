@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateFantasyPointDto } from '../dto/create-fantasy-point.dto';
 import { UpdateFantasyPointDto } from '../dto/update-fantasy-point.dto';
-import { InjectRepository } from '@nestjs/typeorm';
 import { FantasyPoint } from '../entities/fantasy-point.entity';
-import { Repository } from 'typeorm';
 
 @Injectable()
 export class FantasyPointService {
@@ -76,5 +76,44 @@ export class FantasyPointService {
       .from(FantasyPoint) // The entity/table from which to delete records
       .where('mid = :mid', { mid }) // Condition for the records to delete
       .execute();
+  }
+
+  async getGroupedData() {
+    const groupedData = await this.fantasyPointRepository
+      .createQueryBuilder('fp')
+      .select('fp.pid', 'pid')
+      .addSelect('SUM(fp.goalscored)', 'goalsScoredForward')
+      .addSelect('SUM(fp.assist)', 'assists')
+      .addSelect('SUM(fp.passes)', 'passesCompleted')
+      .addSelect('SUM(fp.shotsontarget)', 'shotsOnTarget')
+      .addSelect('SUM(fp.chancecreated)', 'chancesCreated')
+      .addSelect('SUM(fp.interceptionwon)', 'interceptions')
+      .addSelect('SUM(fp.cleansheet)', 'cleanSheets')
+      .addSelect('SUM(fp.shotssaved)', 'shotsSaved')
+      .addSelect('SUM(fp.penaltysaved)', 'penaltySaved')
+      .addSelect('SUM(fp.tacklesuccessful)', 'tacklesWon')
+      .addSelect('SUM(fp.yellowcard)', 'yellowCards')
+      .addSelect('SUM(fp.redcard)', 'redCards')
+      .addSelect('SUM(fp.owngoal)', 'ownGoals')
+      .groupBy('fp.pid')
+      .getRawMany();
+
+    // Transform results into a more readable format if needed
+    return groupedData.map((player) => ({
+      pid: player.pid,
+      goalsScoredForward: player.goalsScoredForward || 0,
+      assists: player.assists || 0,
+      passesCompleted: player.passesCompleted || 0,
+      shotsOnTarget: player.shotsOnTarget || 0,
+      chancesCreated: player.chancesCreated || 0,
+      interceptions: player.interceptions || 0,
+      cleanSheets: player.cleanSheets || 0,
+      shotsSaved: player.shotsSaved || 0,
+      penaltySaved: player.penaltySaved || 0,
+      tacklesWon: player.tacklesWon || 0,
+      yellowCards: player.yellowCards || 0,
+      redCards: player.redCards || 0,
+      ownGoals: player.ownGoals || 0,
+    }));
   }
 }
