@@ -16,8 +16,8 @@ export class TeamPlayer {
   id: number;
 
   @Column({
-    type: 'enum',
-    enum: ['goalKeeper', 'defense', 'midFielder', 'offense'],
+    // type: 'enum',
+    // enum: ['goalKeeper', 'defense', 'midFielder', 'offense'],
     default: 'defense',
   })
   position: string;

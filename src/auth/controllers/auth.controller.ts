@@ -95,12 +95,12 @@ export class AuthController {
   }
 
   @Patch('substitution')
-  @ApiBearerAuth()
-  @UseGuards(JwtGuard)
+  // @ApiBearerAuth()
+  // @UseGuards(JwtGuard)
   substitution(
-    @GetUser() user: User,
+    // @GetUser() user: User,
     @Body() updateUserDto: CreateSubstitutionDto,
   ) {
-    return this.authService.substitution(user, updateUserDto);
+    return this.authService.substitution(updateUserDto);
   }
 }

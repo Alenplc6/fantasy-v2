@@ -1,11 +1,12 @@
 import {
-  Entity,
   Column,
-  PrimaryGeneratedColumn,
   CreateDateColumn,
+  Entity,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-@Entity()
+
+@Entity('players')
 export class Player {
   @PrimaryGeneratedColumn()
   id: number;

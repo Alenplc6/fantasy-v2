@@ -25,6 +25,7 @@ import { Player } from './player/entities/player.entity';
 import { PlayerModule } from './player/player.module';
 import { Team } from './team/entities';
 import { TeamModule } from './team/team.module';
+import { TransferModule } from './transfer/transfer.module';
 import { TeamPlayer } from './user/entities/team.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
@@ -77,6 +78,7 @@ import { UserModule } from './user/user.module';
     TeamModule,
     FormationModule,
     JobsModule,
+    TransferModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -56,6 +56,12 @@ export class User {
   @Column({ default: false })
   isTeamCreated: boolean;
 
+  @Column({ default: 0 })
+  budget: number;
+
+  // @OneToMany(() => Transfer, (transfer) => transfer.user, { nullable: true })
+  // transfers?: Transfer[];
+
   @CreateDateColumn({ type: 'timestamp' })
   createdAt: Date;
 

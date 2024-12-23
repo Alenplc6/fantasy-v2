@@ -58,9 +58,9 @@ export class AuthService {
     return await this.userService.updateSetting(user, updateUserDto);
   }
 
-  async substitution(user: User, updateUserDto: CreateSubstitutionDto) {
+  async substitution(updateUserDto: CreateSubstitutionDto) {
     const { oldPlayerId, newPlayerId } = updateUserDto;
-    return await this.userService.substitution(user, {
+    return await this.userService.substitution({
       oldPlayerId,
       newPlayerId,
     });

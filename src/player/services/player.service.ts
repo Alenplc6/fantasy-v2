@@ -37,9 +37,8 @@ export class PlayerService {
     @InjectQueue('player-queue') private readonly playerQueue: Queue,
     private readonly httpService: HttpService,
   ) {}
-
-  async create(dto: CreatePlayerDto) {
-    const player = this.playerRepository.create({ ...dto });
+  async create(dto: CreatePlayerDto[]) {
+    const player = this.playerRepository.create(dto);
     await this.playerRepository.save(player);
     return player;
   }

@@ -18,21 +18,21 @@ export class FormationService {
   ) {}
 
   async create(createFormationDto: CreateFormationDtoOld): Promise<Formation> {
-    const Defense = [];
-    const Offense = [];
-    const MidField = [];
+    const Def = [];
+    const Off = [];
+    const Mid = [];
     const { name, defense, offense, midfield } = createFormationDto;
 
     for (let i = 0; i < defense; i++) {
-      Defense.push({ name: `Defense ${i + 1}` });
+      Def.push({ name: `Defense ${i + 1}` });
     }
 
     for (let j = 0; j < offense; j++) {
-      Offense.push({ name: `Offense ${j + 1}` });
+      Off.push({ name: `Offense ${j + 1}` });
     }
 
     for (let k = 0; k < midfield; k++) {
-      MidField.push({ name: `Mid Field ${k + 1}` });
+      Mid.push({ name: `Mid Field ${k + 1}` });
     }
     const formation = this.formationRepository.create({
       name,
@@ -40,9 +40,9 @@ export class FormationService {
       midfield,
       defense,
       formationAlignment: JSON.stringify([
-        { name: 'Defense', players: Defense },
-        { name: 'Mid Field', players: MidField },
-        { name: 'Offense', players: Offense },
+        { name: 'Defense', players: Def },
+        { name: 'Mid Field', players: Mid },
+        { name: 'Offense', players: Off },
       ]),
     });
 
