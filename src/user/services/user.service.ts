@@ -499,6 +499,7 @@ export class UserService {
       ) {
         myTeam[positionIndex].players.push({
           id: playerData.id,
+          playerId: playerData.playerId,
           name: playerData.player.fullName,
         });
       }
