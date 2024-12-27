@@ -74,8 +74,8 @@ export class TransferService {
   }
 
   async findAll(): Promise<Transfer[]> {
-    return this.transferRepository.find({
-      relations: ['playerIn', 'playerOut', 'user'],
+    return await this.transferRepository.find({
+      // relations: ['playerIn', 'playerOut', 'user'],
     });
   }
 

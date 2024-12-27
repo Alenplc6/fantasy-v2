@@ -8,6 +8,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { CoachModule } from './coach/coach.module';
+import { Coach } from './coach/entities/coach.entity';
 import { FantasyPoint } from './fantasy-point/entities/fantasy-point.entity';
 import { FantasyPointModule } from './fantasy-point/fantasy-point.module';
 import { Formation } from './formation/entities/formation.entity';
@@ -55,6 +57,7 @@ import { UserModule } from './user/user.module';
           Highlight,
           News,
           Formation,
+          Coach,
         ],
         synchronize: true,
         autoLoadEntities: true,
@@ -79,6 +82,7 @@ import { UserModule } from './user/user.module';
     FormationModule,
     JobsModule,
     TransferModule,
+    CoachModule,
   ],
   controllers: [AppController],
   providers: [AppService],
