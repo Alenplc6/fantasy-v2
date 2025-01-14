@@ -31,6 +31,7 @@ import { TransferModule } from './transfer/transfer.module';
 import { TeamPlayer } from './user/entities/team.entity';
 import { User } from './user/entities/user.entity';
 import { UserModule } from './user/user.module';
+import { DashboardModule } from './dashboard/dashboard.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -83,6 +84,7 @@ import { UserModule } from './user/user.module';
     JobsModule,
     TransferModule,
     CoachModule,
+    DashboardModule,
   ],
   controllers: [AppController],
   providers: [AppService],

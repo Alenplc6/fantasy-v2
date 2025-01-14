@@ -17,6 +17,7 @@ import { User } from '../entities/user.entity';
 @Injectable()
 export class UserService {
   constructor(
+    // private ds: DataSource,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectRepository(TeamPlayer)
     private readonly teamPlayerRepository: Repository<TeamPlayer>,
@@ -79,10 +80,10 @@ export class UserService {
     return user;
   }
 
-  async findAll(q: string, pageSize: number, page: number) {
+  async findAll(q: string, pageSize: number, page: number, role?: string) {
     // return await this.userRepository.find();
     const [data, total] = await this.userRepository.findAndCount({
-      where: { fullName: ILike(`%${q}%`) },
+      where: { fullName: ILike(`%${q}%`), role: role },
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results
       order: {
@@ -159,93 +160,6 @@ export class UserService {
     });
   }
 
-  // async createTeam(id: number, createTeamDto: CreateTeamDto) {
-  //   const {
-  //     teamName,
-  //     coachName,
-  //     formation,
-  //     goalKeeper,
-  //     defense,
-  //     midFielder,
-  //     offense,
-  //     // capitan,
-  //   } = createTeamDto;
-  //   const user = await this.userRepository.findOne({ where: { id } });
-  //   if (!user) {
-  //     throw new HttpException('user dose not exist', HttpStatus.BAD_REQUEST);
-  //   }
-
-  //   const formationData = await this.formationRepository.findOne({
-  //     where: { id: formation },
-  //   });
-  //   if (!formationData) {
-  //     throw new HttpException(
-  //       'formation dose not exist',
-  //       HttpStatus.BAD_REQUEST,
-  //     );
-  //   }
-
-  //   console.log(formationData);
-
-  //   await this.userRepository.update(id, {
-  //     teamName,
-  //     coachName,
-  //     formation: formationData,
-  //     isTeamCreated: true,
-  //   });
-
-  //   goalKeeper.map(async (goal: string) => {
-  //     const teamPlayer = new TeamPlayer();
-  //     const player = await this.playerRepository.findOneBy({ id: +goal });
-  //     teamPlayer.pid = player.pid;
-  //     teamPlayer.player = player; // Assign the Player entity
-  //     teamPlayer.user = user; // Assign the User entity
-  //     teamPlayer.position = 'goalKeeper';
-  //     teamPlayer.isCapitan = false;
-  //     await this.teamPlayerRepository.save(teamPlayer);
-  //   });
-
-  //   defense.map(async (def: string) => {
-  //     const teamPlayer = new TeamPlayer();
-
-  //     const player = await this.playerRepository.findOneBy({ id: +def });
-
-  //     teamPlayer.pid = player.pid;
-  //     teamPlayer.player = player; // Assign the Player entity
-  //     teamPlayer.user = user; // Assign the User entity
-  //     teamPlayer.position = 'defense';
-  //     teamPlayer.isCapitan = false;
-  //     await this.teamPlayerRepository.save(teamPlayer);
-  //   });
-
-  //   midFielder.map(async (mid: string) => {
-  //     const teamPlayer = new TeamPlayer();
-
-  //     const player = await this.playerRepository.findOneBy({ id: +mid });
-
-  //     teamPlayer.pid = player.pid;
-  //     teamPlayer.player = player; // Assign the Player entity
-  //     teamPlayer.user = user; // Assign the User entity
-  //     teamPlayer.position = 'midFielder';
-  //     teamPlayer.isCapitan = false;
-  //     await this.teamPlayerRepository.save(teamPlayer);
-  //   });
-
-  //   offense.map(async (off: string) => {
-  //     const teamPlayer = new TeamPlayer();
-
-  //     const player = await this.playerRepository.findOneBy({ id: +off });
-
-  //     teamPlayer.pid = player.pid;
-  //     teamPlayer.player = player; // Assign the Player entity
-  //     teamPlayer.user = user; // Assign the User entity
-  //     teamPlayer.position = 'offense';
-  //     teamPlayer.isCapitan = false;
-  //     await this.teamPlayerRepository.save(teamPlayer);
-  //   });
-
-  //   return user;
-  // }
   async createTeam(id: number, createTeamDto: CreateTeamDto) {
     const {
       teamName,
@@ -376,17 +290,15 @@ export class UserService {
 
     // await this.teamPlayerRepository.remove(oldPlayer);
 
-    const oldPlayerDb = await this.teamPlayerRepository.save({
+    const oldPlayerDb = await this.teamPlayerRepository.update(oldPlayer.id, {
       id: oldPlayer.id, // Ensure `id` is correctly referenced
       isOnTheBench: true,
     });
 
-    const newPlayerDb = await this.teamPlayerRepository.save({
+    const newPlayerDb = await this.teamPlayerRepository.update(newPlayer.id, {
       id: newPlayer.id, // Ensure `id` is correctly referenced
       isOnTheBench: false,
     });
-
-    console.log(oldPlayerDb, newPlayerDb);
 
     return {
       oldPlayerDb,
@@ -526,5 +438,43 @@ export class UserService {
         name: teamPlayer.player.fullName, // Rename fullName to name
       };
     });
+  }
+
+  async getUsersOverview() {
+    const query = this.userRepository
+      .createQueryBuilder('user')
+      .select("DATE_FORMAT(user.createdAt, '%Y-%m')", 'month')
+      .addSelect('COUNT(user.id)', 'count')
+      .where('user.createdAt IS NOT NULL') // Guard clause
+      .groupBy("DATE_FORMAT(user.createdAt, '%Y-%m')")
+      .orderBy('month', 'DESC');
+
+    const rawData = await query.getRawMany();
+
+    // Map numeric months to short month names
+    const monthNames = [
+      'jan',
+      'feb',
+      'mar',
+      'apr',
+      'may',
+      'jun',
+      'jul',
+      'aug',
+      'sep',
+      'oct',
+      'nov',
+      'dec',
+    ];
+
+    const result = rawData.map((item) => {
+      const [month] = item.month.split('-');
+      return {
+        month: monthNames[parseInt(month, 10) - 1], // Convert to 0-based index
+        count: parseInt(item.count, 10),
+      };
+    });
+
+    return result;
   }
 }

@@ -35,6 +35,10 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Get('count-per-month')
+  async getUserCountPerMonth() {
+    return this.userService.getUsersOverview();
+  }
   @Get()
   @ApiQuery({
     name: 'query',
@@ -46,7 +50,21 @@ export class UserController {
     @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
     @Query('query', new DefaultValuePipe('')) search?: string,
   ) {
-    return this.userService.findAll(search, size, page);
+    return this.userService.findAll(search, size, page, 'user');
+  }
+
+  @Get('/admin')
+  @ApiQuery({
+    name: 'query',
+    required: false,
+    description: 'Filter teams by query',
+  })
+  findAllAdmin(
+    @Query('size', new DefaultValuePipe(0), ParseIntPipe) size: number,
+    @Query('page', new DefaultValuePipe(0), ParseIntPipe) page: number,
+    @Query('query', new DefaultValuePipe('')) search?: string,
+  ) {
+    return this.userService.findAll(search, size, page, 'admin');
   }
 
   @Get(':id')
@@ -67,4 +85,5 @@ export class UserController {
   remove(@Param('id') id: string) {
     return this.userService.remove(+id);
   }
+
 }

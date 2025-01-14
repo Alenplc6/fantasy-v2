@@ -14,6 +14,12 @@ export class Coach {
   @Column()
   name: string;
 
+  @Column()
+  clubName: string;
+
+  @Column()
+  profileIMage: string;
+
   @CreateDateColumn()
   createdAt: Date;
 

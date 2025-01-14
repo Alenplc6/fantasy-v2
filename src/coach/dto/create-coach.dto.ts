@@ -6,4 +6,14 @@ export class CreateCoachDto {
   @IsNotEmpty()
   @ApiProperty({ name: 'name', type: String })
   name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ name: 'clubName', type: String })
+  clubName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ name: 'profileIMage', type: String })
+  profileIMage: string;
 }

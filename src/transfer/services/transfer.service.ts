@@ -57,6 +57,7 @@ export class TransferService {
     // create player
     // create the team player with the new player
     const player = await this.playerRepository.findOneBy({ id: +playerInId });
+
     if (player) {
       const teamPlayer = this.teamPlayerRepository.create({
         pid: player.pid,
@@ -75,7 +76,7 @@ export class TransferService {
 
   async findAll(): Promise<Transfer[]> {
     return await this.transferRepository.find({
-      // relations: ['playerIn', 'playerOut', 'user'],
+      relations: ['playerInId', 'playerOutId'],
     });
   }
 
