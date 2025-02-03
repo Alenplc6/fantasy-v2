@@ -5,12 +5,9 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Competition } from './competition';
 import { GameWeekTeam } from './team-game-week';
-import { Venue } from './venue';
 
 @Entity()
 export class GameWeek {
@@ -97,14 +94,6 @@ export class GameWeek {
 
   @Column({ nullable: true })
   overtimelength: string;
-
-  @OneToOne(() => Competition, { eager: true, cascade: true })
-  @JoinColumn()
-  competition: Competition;
-
-  @ManyToOne(() => Venue, { eager: true, cascade: true })
-  @JoinColumn()
-  venue: Venue;
 
   @Column()
   lineupavailable: string;

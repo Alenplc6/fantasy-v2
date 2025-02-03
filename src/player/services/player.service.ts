@@ -37,6 +37,7 @@ export class PlayerService {
     @InjectQueue('player-queue') private readonly playerQueue: Queue,
     private readonly httpService: HttpService,
   ) {}
+
   async create(dto: CreatePlayerDto[]) {
     const player = this.playerRepository.create(dto);
     await this.playerRepository.save(player);
@@ -46,7 +47,7 @@ export class PlayerService {
   async findAll(q: string, pageSize: number, page: number) {
     const [data, total] = await this.playerRepository.findAndCount({
       where: {
-        fullName: ILike(`%${q}%`),
+        // fullName: ILike(`%${q}%`),
       },
       skip: (page - 1) * pageSize, // calculate the offset
       take: pageSize, // limit the number of results

@@ -56,8 +56,8 @@ export class User {
   @Column({ default: false })
   isTeamCreated: boolean;
 
-  @Column({ default: 0 })
-  budget: number;
+  @Column({ default: 0, nullable: true })
+  budget?: number;
 
   // @OneToMany(() => Transfer, (transfer) => transfer.user, { nullable: true })
   // transfers?: Transfer[];

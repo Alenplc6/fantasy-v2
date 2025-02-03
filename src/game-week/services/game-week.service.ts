@@ -10,10 +10,8 @@ import { catchError, firstValueFrom, map } from 'rxjs';
 import { PlayerPoint } from 'src/player-point/entities/player-point.entity';
 import { Repository } from 'typeorm';
 import { FantasyPointService } from '../../fantasy-point/services/fantasy-point.service';
-import { Competition } from '../entities/competition';
 import { GameWeek } from '../entities/game-week.entity';
 import { GameWeekTeam } from '../entities/team-game-week';
-import { Venue } from '../entities/venue';
 
 @Injectable()
 export class GameWeekService {
@@ -30,10 +28,6 @@ export class GameWeekService {
     private readonly playerPointRepository: Repository<PlayerPoint>,
     @InjectRepository(GameWeekTeam)
     private readonly gameWeekTeamRepository: Repository<GameWeekTeam>,
-    @InjectRepository(Competition)
-    private readonly competitionRepository: Repository<Competition>,
-    @InjectRepository(Venue)
-    private readonly venueRepository: Repository<Venue>,
   ) {}
 
   async getFantasyPoints() {
@@ -171,7 +165,6 @@ export class GameWeekService {
       .createQueryBuilder('gameWeek')
       .leftJoinAndSelect('gameWeek.home_team', 'homeTeam') // Ensure this is the correct relationship
       .leftJoinAndSelect('gameWeek.away_team', 'awayTeam') // Ensure this is the correct relationship
-      .leftJoinAndSelect('gameWeek.venue', 'venue') // Ensure this is the correct relationship
       .where('LOWER(homeTeam.tname) LIKE LOWER(:tname)', {
         tname: `%${q.toLocaleLowerCase()}%`,
       }); // Case-insensitive search
@@ -244,17 +237,17 @@ export class GameWeekService {
             awayTeam = this.gameWeekTeamRepository.create(teamData.teams.away);
           }
 
-          const venue = await this.venueRepository.findBy({
-            venueid: teamData.venue.venueid,
-          });
+          // const venue = await this.venueRepository.findBy({
+          //   venueid: teamData.venue.venueid,
+          // });
 
-          if (venue.length > 0) {
-            competitionVenue = venue[0];
-          } else {
-            competitionVenue = await this.venueRepository.create(
-              teamData.venue,
-            );
-          }
+          // if (venue.length > 0) {
+          //   competitionVenue = venue[0];
+          // } else {
+          //   competitionVenue = await this.venueRepository.create(
+          //     teamData.venue,
+          //   );
+          // }
 
           const team = this.gameWeekRepository.create({
             ...teamData,

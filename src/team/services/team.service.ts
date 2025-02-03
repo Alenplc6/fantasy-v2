@@ -3,16 +3,16 @@ import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AxiosResponse } from 'axios';
 import { map } from 'rxjs';
-import { GameWeekTeam } from 'src/game-week/entities/team-game-week';
 import { Repository } from 'typeorm';
 import { CreateTeamDto } from '../dto/create-team.dto';
 import { UpdateTeamDto } from '../dto/update-team.dto';
+import { Team } from '../entities';
 
 @Injectable()
 export class TeamService {
   constructor(
-    @InjectRepository(GameWeekTeam)
-    private readonly teamRepository: Repository<GameWeekTeam>,
+    @InjectRepository(Team)
+    private readonly teamRepository: Repository<Team>,
     private readonly httpService: HttpService,
   ) {}
 
@@ -24,12 +24,14 @@ export class TeamService {
 
   async findAll(q: string, pageSize: number, page: number) {
     const query = this.teamRepository.createQueryBuilder('team');
+    query.distinctOn(['team.abbr']);
     query.where('LOWER(team.fullname) LIKE LOWER(:fullname)', {
       fullname: `%${q}%`,
     });
+    query.orderBy('team.abbr', 'ASC'); // Order by distinctOn column first
+    query.addOrderBy('team.id', 'DESC'); // Then order by id
     query.skip((page - 1) * pageSize);
     query.take(pageSize);
-    query.orderBy('team.id', 'DESC');
 
     const [data, total] = await query.getManyAndCount();
     return {

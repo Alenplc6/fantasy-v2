@@ -14,9 +14,7 @@ import { BullBoardModule } from '@bull-board/nestjs';
 import { BullMQAdapter } from '@bull-board/api/bullMQAdapter';
 import { Player } from 'src/player/entities/player.entity';
 import { User } from 'src/user/entities/user.entity';
-import { Competition } from './entities/competition';
 import { GameWeekTeam } from './entities/team-game-week';
-import { Venue } from './entities/venue';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
@@ -27,9 +25,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       TeamPlayer,
       FantasyPoint,
       PlayerPoint,
-      Competition,
+      // Competition,
       GameWeekTeam,
-      Venue,
+      // Venue,
       Player,
       User,
     ]),
